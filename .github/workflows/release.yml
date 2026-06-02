@@ -19,12 +19,12 @@ jobs:
         with:
           go-version-file: go.mod
 
-      # Build the release notes from this tag's commits into a gitignored file
-      # (NOT the tracked CHANGELOG.md). Overwriting CHANGELOG.md here would leave
-      # the worktree dirty and goreleaser aborts with "git is in a dirty state".
-      # We also do NOT push the changelog back to main: the `branch_protect`
-      # ruleset blocks direct pushes from github-actions[bot] (only the repo
-      # owner bypasses). The docs Changelog page is updated via a normal PR.
+      # Build this tag's release notes into a gitignored file (NOT the tracked
+      # CHANGELOG.md — overwriting it dirties the worktree and goreleaser aborts
+      # with "git is in a dirty state"). We also do NOT push the changelog back
+      # to main: the `branch_protect` ruleset blocks direct pushes from
+      # github-actions[bot] (only the repo owner bypasses). The docs Changelog
+      # page is updated via a normal PR.
       - name: Generate release notes
         uses: orhun/git-cliff-action@v4
         with:
@@ -38,7 +38,17 @@ jobs:
         uses: goreleaser/goreleaser-action@v7
         with:
           version: latest
-          # Docker images are built in docker.yml; goreleaser only ships binaries.
-          args: release --clean --release-notes=RELEASE_NOTES.md
+          # Docker images are built in docker.yml; goreleaser ships only binaries.
+          # We intentionally do NOT pass --release-notes here: with
+          # changelog.disable=true in .goreleaser.yml, goreleaser ignores it and
+          # publishes an empty body. The body is set in the next step instead.
+          args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Set the release body explicitly from the git-cliff notes. This is robust
+      # regardless of goreleaser's --release-notes quirks.
+      - name: Attach release notes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release edit "${{ github.ref_name }}" --notes-file RELEASE_NOTES.md
