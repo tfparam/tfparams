@@ -38,12 +38,12 @@ func newCompareCmd() *cobra.Command {
 	}
 	fl := cmd.Flags()
 	fl.StringArrayVar(&f.envs, "env", nil, "name=<uri-or-path> to a plan JSON (repeat; at least two required)")
-	fl.StringArrayVar(&f.docsJSON, "docs-json", nil, "terraform-docs json output file (required, repeatable)")
-	fl.StringVar(&f.out, "out", "", "output file; default stdout")
+	fl.StringArrayVar(&f.docsJSON, "docs-json", nil, "terraform-docs JSON, e.g. <(terraform-docs json .) (required, repeatable)")
+	fl.StringVar(&f.out, "out", "", "output file (overwritten); default stdout")
 	fl.StringVar(&f.format, "format", "table", "output format: table (csv/json TBD)")
 	fl.BoolVar(&f.highlightDiff, "highlight-diff", true, "highlight rows that differ across environments")
 	fl.BoolVar(&f.showSensitive, "show-sensitive", false, "show sensitive values unmasked")
-	fl.StringVar(&f.sortBy, "sort-by", "name", "sort key: name, required, or type")
+	fl.StringVar(&f.sortBy, "sort-by", "required", "sort key: required (required first, then name) or name")
 	fl.StringVar(&f.scope, "scope", "root", "scope: root or module")
 	fl.StringVar(&f.module, "module", "", "module call name for --scope module")
 	return cmd
@@ -70,7 +70,6 @@ func runCompare(cmd *cobra.Command, f *compareFlags) error {
 	}
 	inputs := merger.MergeInputs(docs...)
 
-	sortRequested := cmd.Flags().Changed("sort-by")
 	ctx := context.Background()
 
 	var envResults []merger.EnvResult
@@ -93,9 +92,7 @@ func runCompare(cmd *cobra.Command, f *compareFlags) error {
 		if err != nil {
 			return fmt.Errorf("env %s: %w", name, err)
 		}
-		if sortRequested {
-			sortParams(params, f.sortBy)
-		}
+		sortParams(params, f.sortBy)
 		if f.scope == "module" && moduleName == "" {
 			if moduleName, err = merger.ModuleName(plan, f.module); err != nil {
 				return err
@@ -114,5 +111,5 @@ func runCompare(cmd *cobra.Command, f *compareFlags) error {
 		Scope:         f.scope,
 		ModuleName:    moduleName,
 	})
-	return writeOutput(cmd, f.out, "standalone", content)
+	return writeOutput(cmd, f.out, content)
 }
