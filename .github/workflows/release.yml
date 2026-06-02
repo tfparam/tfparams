@@ -19,18 +19,19 @@ jobs:
         with:
           go-version-file: go.mod
 
-      # Build the release notes from this tag's commits. We do NOT push the
-      # changelog back to main here: the `branch_protect` ruleset blocks direct
-      # pushes from github-actions[bot] (only the repo owner can bypass), so a
-      # push step would fail the job before goreleaser runs. The docs Changelog
-      # page is updated via a normal PR instead.
+      # Build the release notes from this tag's commits into a gitignored file
+      # (NOT the tracked CHANGELOG.md). Overwriting CHANGELOG.md here would leave
+      # the worktree dirty and goreleaser aborts with "git is in a dirty state".
+      # We also do NOT push the changelog back to main: the `branch_protect`
+      # ruleset blocks direct pushes from github-actions[bot] (only the repo
+      # owner bypasses). The docs Changelog page is updated via a normal PR.
       - name: Generate release notes
         uses: orhun/git-cliff-action@v4
         with:
           config: cliff.toml
           args: --latest --strip header
         env:
-          OUTPUT: CHANGELOG.md
+          OUTPUT: RELEASE_NOTES.md
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run goreleaser
@@ -38,6 +39,6 @@ jobs:
         with:
           version: latest
           # Docker images are built in docker.yml; goreleaser only ships binaries.
-          args: release --clean --release-notes=CHANGELOG.md
+          args: release --clean --release-notes=RELEASE_NOTES.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
