@@ -27,7 +27,7 @@ func runRecursive(cmd *cobra.Command, f *rootFlags, rootCfg config.Config, root 
 		dir := filepath.Join(root.recursivePath, e.Name())
 		planPath := filepath.Join(dir, root.planFile)
 		if !fileExists(planPath) {
-			fmt.Fprintf(cmd.ErrOrStderr(), "tfparams: skipping %s (no %s)\n", dir, root.planFile)
+			_, _ = fmt.Fprintf(cmd.ErrOrStderr(), "tfparams: skipping %s (no %s)\n", dir, root.planFile)
 			continue
 		}
 
@@ -51,19 +51,19 @@ func runRecursive(cmd *cobra.Command, f *rootFlags, rootCfg config.Config, root 
 		}
 
 		if sub.out == "" {
-			fmt.Fprintf(cmd.OutOrStdout(), "===== %s =====\n%s\n", dir, content)
+			_, _ = fmt.Fprintf(cmd.OutOrStdout(), "===== %s =====\n%s\n", dir, content)
 		} else {
 			target := filepath.Join(dir, sub.out)
-			if werr := writeToFile(target, sub.mode, content); werr != nil {
+			if werr := writeToFile(target, content); werr != nil {
 				return werr
 			}
-			fmt.Fprintf(cmd.ErrOrStderr(), "tfparams: wrote %s\n", target)
+			_, _ = fmt.Fprintf(cmd.ErrOrStderr(), "tfparams: wrote %s\n", target)
 		}
 		processed++
 	}
 
 	if processed == 0 {
-		fmt.Fprintf(cmd.ErrOrStderr(), "tfparams: no subdirectories with %s under %s\n", root.planFile, root.recursivePath)
+		_, _ = fmt.Fprintf(cmd.ErrOrStderr(), "tfparams: no subdirectories with %s under %s\n", root.planFile, root.recursivePath)
 	}
 	return nil
 }
@@ -78,6 +78,6 @@ func readPlanFile(path string) (*parser.Plan, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 	return parser.ParsePlan(file)
 }

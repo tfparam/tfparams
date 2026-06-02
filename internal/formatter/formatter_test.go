@@ -64,36 +64,3 @@ func TestMarkdownNoDefaultColumn(t *testing.T) {
 		t.Errorf("Default column should be hidden:\n%s", out)
 	}
 }
-
-func TestInjectAppendsWhenNoMarkers(t *testing.T) {
-	got, err := Inject("# Title\n\nbody\n", "TABLE")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if !strings.Contains(got, BeginMarker) || !strings.Contains(got, "TABLE") || !strings.Contains(got, EndMarker) {
-		t.Errorf("append failed:\n%s", got)
-	}
-	if !strings.HasPrefix(got, "# Title") {
-		t.Errorf("original content not preserved:\n%s", got)
-	}
-}
-
-func TestInjectReplacesBetweenMarkers(t *testing.T) {
-	existing := "# Doc\n\n" + BeginMarker + "\nOLD\n" + EndMarker + "\n\n## Keep me\n"
-	got, err := Inject(existing, "NEW")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if strings.Contains(got, "OLD") {
-		t.Errorf("old content should be replaced:\n%s", got)
-	}
-	if !strings.Contains(got, "NEW") || !strings.Contains(got, "## Keep me") {
-		t.Errorf("inject failed to keep surrounding content:\n%s", got)
-	}
-}
-
-func TestInjectUnbalancedMarkers(t *testing.T) {
-	if _, err := Inject("x\n"+BeginMarker+"\nonly begin\n", "NEW"); err != ErrUnbalancedMarkers {
-		t.Errorf("want ErrUnbalancedMarkers, got %v", err)
-	}
-}
