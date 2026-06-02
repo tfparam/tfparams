@@ -5,7 +5,8 @@ from terraform-docs** and renders a Markdown parameter sheet.
 
 ::: warning Data source
 Input variable values live only in a **plan** file. `terraform.tfstate` (and a bare
-`terraform show -json`) does not carry them. Always feed a plan:
+`terraform show -json`) does not carry them, and `*.tfvars` alone is incomplete (it
+omits `TF_VAR_*`, `-var`, defaults, and computed values). Always feed a plan:
 `terraform plan -out=tfplan && terraform show -json tfplan`.
 :::
 

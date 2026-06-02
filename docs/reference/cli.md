@@ -4,6 +4,19 @@
 
 Generate a parameter sheet from a plan JSON and terraform-docs metadata.
 
+::: tip Input is a plan JSON, not `*.tfvars`
+tfparams reads a **plan JSON** (`terraform show -json <planfile>`), not `*.tfvars`
+files. A tfvars file alone is incomplete — it omits `TF_VAR_*` environment
+variables, `-var` CLI flags, variable defaults, and computed values. The plan is
+the only source carrying the **fully resolved** applied values, so produce one
+first:
+
+```bash
+terraform plan -out=tfplan
+terraform show -json tfplan > plan.json
+```
+:::
+
 | Flag | Default | Description |
 |------|---------|-------------|
 | `--plan-json` | stdin | Plan JSON file (`terraform show -json <planfile>`) |
