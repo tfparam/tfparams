@@ -1,2 +1,2 @@
-# tfparam
-Generate Markdown parameter sheets from Terraform state and variable definitions.
+# tfparams
+Generate Markdown parameter sheets from Terraform plan values and variable definitions.

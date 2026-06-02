@@ -1,0 +1,33 @@
+{
+  "inputs": [
+    {
+      "name": "instance_type",
+      "type": "string",
+      "description": "EC2インスタンスタイプ",
+      "default": "t3.medium",
+      "required": false
+    },
+    {
+      "name": "replica_count",
+      "type": "number",
+      "description": "RDSレプリカ数",
+      "default": 1,
+      "required": false
+    },
+    {
+      "name": "db_password",
+      "type": "string",
+      "description": "DBパスワード",
+      "default": null,
+      "required": true,
+      "sensitive": true
+    },
+    {
+      "name": "multi_az",
+      "type": "bool",
+      "description": "Multi-AZ有効化",
+      "default": false,
+      "required": false
+    }
+  ]
+}

@@ -30,3 +30,14 @@ go.work.sum
 # Editor/IDE
 # .idea/
 # .vscode/
+
+# 作業用プロンプト（配布対象外）
+prompt/
+
+# Terraform working files (e.g. e2e fixtures)
+**/.terraform/
+**/.terraform.lock.hcl
+*.tfstate
+*.tfstate.*
+tfplan
+tfplan.json
