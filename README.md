@@ -73,20 +73,13 @@ tfparams --plan-json plan.json --scope module --module app \
   --docs-json <(terraform-docs json ../../modules/app/)
 ```
 
-### inject mode
-
-Update only the region between markers in an existing file:
+### Write to a file
 
 ```bash
-tfparams --plan-json plan.json --docs-json docs.json \
-  --out README.md --output-mode inject
+tfparams --plan-json plan.json --docs-json docs.json --out PARAMETERS.md
 ```
 
-```markdown
-<!-- BEGIN_TFPARAMS -->
-（auto-updated by tfparams）
-<!-- END_TFPARAMS -->
-```
+`--out` overwrites the file; without it, output goes to stdout.
 
 ### Compare environments
 
@@ -120,7 +113,6 @@ only selects how the bytes are fetched, using each cloud SDK's default credentia
     plan-json: plan.json
     docs-json: docs.json
     output-file: PARAMETERS.md
-    output-mode: inject
 ```
 
 ```yaml
@@ -130,7 +122,7 @@ repos:
     rev: "v0.1.0"
     hooks:
       - id: tfparams
-        args: ["--out", "PARAMETERS.md", "--output-mode", "inject"]
+        args: ["--out", "PARAMETERS.md"]
 ```
 
 ## Output formats
@@ -148,16 +140,13 @@ env: production
 scope: root              # root / module
 module: ""               # module call name when scope: module (empty = auto)
 output:
-  file: PARAMETERS.md
-  mode: standalone        # standalone / inject / replace
+  file: PARAMETERS.md       # overwritten if it exists
 columns:
   show: [name, description, type, default, applied_value, required]
 sort:
-  enabled: false          # default keeps terraform-docs order
-  by: name                # name / required / type
+  by: required              # required (required first, then name) / name
 sensitive:
   show: false
-  mask: "(sensitive)"
 recursive:
   enabled: false
   path: .                 # scan root (env dir by default)
