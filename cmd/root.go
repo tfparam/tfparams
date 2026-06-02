@@ -22,12 +22,10 @@ func SetVersion(v string) { version = v }
 
 type rootFlags struct {
 	planJSON      string
-	stateJSON     string
 	docsJSON      []string
 	scope         string
 	module        string
 	out           string
-	outputMode    string
 	format        string
 	env           string
 	showSensitive bool
@@ -54,12 +52,10 @@ func NewRootCmd() *cobra.Command {
 	}
 	fl := cmd.Flags()
 	fl.StringVar(&f.planJSON, "plan-json", "", "plan JSON file (terraform show -json <planfile>); default stdin")
-	fl.StringVar(&f.stateJSON, "state-json", "", "deprecated alias for --plan-json")
-	fl.StringArrayVar(&f.docsJSON, "docs-json", nil, "terraform-docs json output file (required, repeatable)")
+	fl.StringArrayVar(&f.docsJSON, "docs-json", nil, "terraform-docs JSON, e.g. <(terraform-docs json .) (required, repeatable)")
 	fl.StringVar(&f.scope, "scope", "root", "scope: root or module")
 	fl.StringVar(&f.module, "module", "", "module call name for --scope module")
-	fl.StringVar(&f.out, "out", "", "output file; default stdout")
-	fl.StringVar(&f.outputMode, "output-mode", "standalone", "output mode: standalone, inject, or replace")
+	fl.StringVar(&f.out, "out", "", "output file (overwritten); default stdout")
 	fl.StringVar(&f.format, "format", "table", "output format: table, csv, or json")
 	fl.StringVar(&f.env, "env", "", "environment name shown in the header")
 	fl.BoolVar(&f.showSensitive, "show-sensitive", false, "show sensitive values unmasked")
@@ -78,11 +74,11 @@ func Execute() error { return NewRootCmd().Execute() }
 
 // settings holds the effective configuration after merging file config and flags.
 type settings struct {
-	env, scope, module, format, mode, out, sortBy, source string
-	showSensitive, sortEnabled, recursive                 bool
-	recursivePath, planFile                               string
-	cols                                                  []string
-	docs                                                  []*parser.Docs
+	env, scope, module, format, out, sortBy, source string
+	showSensitive, sortEnabled, recursive           bool
+	recursivePath, planFile                         string
+	cols                                            []string
+	docs                                            []*parser.Docs
 }
 
 func run(cmd *cobra.Command, f *rootFlags) error {
@@ -100,10 +96,6 @@ func run(cmd *cobra.Command, f *rootFlags) error {
 
 	s := resolveSettings(cmd, f, cfg)
 	s.docs = docs
-
-	if s.mode == "inject" && s.format != "table" {
-		return fmt.Errorf("inject mode requires --format table")
-	}
 
 	if s.recursive {
 		return runRecursive(cmd, f, cfg, s)
@@ -140,7 +132,6 @@ func resolveSettings(cmd *cobra.Command, f *rootFlags, cfg config.Config) settin
 		scope:         pick(changed("scope"), f.scope, cfg.Scope),
 		module:        pick(changed("module"), f.module, cfg.Module),
 		format:        pick(changed("format"), f.format, cfg.Format),
-		mode:          pick(changed("output-mode"), f.outputMode, cfg.Output.Mode),
 		out:           pick(changed("out"), f.out, cfg.Output.File),
 		sortBy:        pick(changed("sort-by"), f.sortBy, cfg.Sort.By),
 		source:        "terraform show -json tfplan (plan)",
@@ -153,9 +144,6 @@ func resolveSettings(cmd *cobra.Command, f *rootFlags, cfg config.Config) settin
 	}
 	if s.format == "" {
 		s.format = "table"
-	}
-	if s.mode == "" {
-		s.mode = "standalone"
 	}
 	if s.recursivePath == "" {
 		s.recursivePath = "."
@@ -225,7 +213,7 @@ func runSingle(cmd *cobra.Command, f *rootFlags, s settings) error {
 	if err != nil {
 		return err
 	}
-	return writeOutput(cmd, s.out, s.mode, content)
+	return writeOutput(cmd, s.out, content)
 }
 
 // pick returns flagVal when the flag was changed, otherwise cfgVal.
@@ -237,14 +225,10 @@ func pick(changed bool, flagVal, cfgVal string) string {
 }
 
 func loadPlan(f *rootFlags) (*parser.Plan, error) {
-	path := f.planJSON
-	if path == "" {
-		path = f.stateJSON
-	}
-	if path == "" {
+	if f.planJSON == "" {
 		return parser.ParsePlan(os.Stdin)
 	}
-	file, err := os.Open(path) //nolint:gosec // path is user-provided input
+	file, err := os.Open(f.planJSON) //nolint:gosec // path is user-provided input
 	if err != nil {
 		return nil, fmt.Errorf("open plan json: %w", err)
 	}
@@ -261,31 +245,17 @@ func readDocs(path string) (*parser.Docs, error) {
 	return parser.ParseDocs(file)
 }
 
-func writeOutput(cmd *cobra.Command, out, mode, content string) error {
+// writeOutput writes to stdout when out is empty, otherwise overwrites the file.
+func writeOutput(cmd *cobra.Command, out, content string) error {
 	if out == "" {
-		if mode == "inject" {
-			return fmt.Errorf("inject mode requires --out")
-		}
 		_, err := io.WriteString(cmd.OutOrStdout(), content)
 		return err
 	}
-	return writeToFile(out, mode, content)
+	return writeToFile(out, content)
 }
 
-func writeToFile(path, mode, content string) error {
-	switch mode {
-	case "standalone", "replace":
-		return os.WriteFile(path, []byte(content), 0o644) //nolint:gosec // sheet is meant to be world-readable
-	case "inject":
-		existing, _ := os.ReadFile(path) //nolint:gosec // missing file is fine (treated as empty)
-		result, err := formatter.Inject(string(existing), content)
-		if err != nil {
-			return err
-		}
-		return os.WriteFile(path, []byte(result), 0o644) //nolint:gosec // sheet is meant to be world-readable
-	default:
-		return fmt.Errorf("unknown output-mode %q (want standalone, inject, or replace)", mode)
-	}
+func writeToFile(path, content string) error {
+	return os.WriteFile(path, []byte(content), 0o644) //nolint:gosec // sheet is meant to be world-readable
 }
 
 func sortParams(params []merger.Param, by string) {

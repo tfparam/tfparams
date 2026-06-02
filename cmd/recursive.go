@@ -54,7 +54,7 @@ func runRecursive(cmd *cobra.Command, f *rootFlags, rootCfg config.Config, root 
 			_, _ = fmt.Fprintf(cmd.OutOrStdout(), "===== %s =====\n%s\n", dir, content)
 		} else {
 			target := filepath.Join(dir, sub.out)
-			if werr := writeToFile(target, sub.mode, content); werr != nil {
+			if werr := writeToFile(target, content); werr != nil {
 				return werr
 			}
 			_, _ = fmt.Fprintf(cmd.ErrOrStderr(), "tfparams: wrote %s\n", target)
