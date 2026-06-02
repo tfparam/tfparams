@@ -32,14 +32,3 @@ func TestRootCommandJSON(t *testing.T) {
 		t.Errorf("json missing variables key:\n%s", out)
 	}
 }
-
-func TestRootCommandInjectRejectsNonTable(t *testing.T) {
-	_, err := runCmd(t,
-		"--plan-json", "../testdata/plan.json",
-		"--docs-json", "../testdata/docs.json",
-		"--format", "csv", "--output-mode", "inject", "--out", "/tmp/tfparams_inject_test.md",
-	)
-	if err == nil {
-		t.Fatal("expected error: inject mode requires table format")
-	}
-}

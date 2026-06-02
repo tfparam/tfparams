@@ -114,5 +114,5 @@ func runCompare(cmd *cobra.Command, f *compareFlags) error {
 		Scope:         f.scope,
 		ModuleName:    moduleName,
 	})
-	return writeOutput(cmd, f.out, "standalone", content)
+	return writeOutput(cmd, f.out, content)
 }
