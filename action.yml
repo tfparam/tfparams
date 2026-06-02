@@ -1,0 +1,27 @@
+name: tfparams
+description: Generate a Terraform parameter sheet from a plan JSON and terraform-docs metadata
+inputs:
+  working-dir:
+    description: Working directory to run in
+    default: "."
+  plan-json:
+    description: Path to the plan JSON (terraform show -json <planfile>)
+    required: true
+  docs-json:
+    description: Path to the terraform-docs json output
+    required: true
+  output-file:
+    description: Output file path
+    default: "PARAMETERS.md"
+  output-mode:
+    description: standalone / inject / replace
+    default: "inject"
+  git-push:
+    description: Whether to commit and push the generated sheet
+    default: "false"
+runs:
+  using: composite
+  steps:
+    - run: tfparams --plan-json ${{ inputs.plan-json }} --docs-json ${{ inputs.docs-json }} --out ${{ inputs.output-file }} --output-mode ${{ inputs.output-mode }}
+      shell: bash
+      working-directory: ${{ inputs.working-dir }}

@@ -6,7 +6,8 @@ import (
 )
 
 func TestCompareCommand(t *testing.T) {
-	out, err := runCmd(t, "compare",
+	out, err := runCmd(
+		t, "compare",
 		"--env", "dev=../testdata/plan_dev.json",
 		"--env", "prd=../testdata/plan_prd.json",
 		"--docs-json", "../testdata/docs.json",
@@ -38,7 +39,8 @@ func TestCompareRequiresTwoEnvs(t *testing.T) {
 func TestCompareUnsupportedScheme(t *testing.T) {
 	// ftp:// fails fast in URI parsing (no network), unlike s3/gs/azblob which
 	// would attempt a real fetch.
-	_, err := runCmd(t, "compare",
+	_, err := runCmd(
+		t, "compare",
 		"--env", "dev=../testdata/plan_dev.json",
 		"--env", "prd=ftp://bucket/prd/plan.json",
 		"--docs-json", "../testdata/docs.json",

@@ -5,8 +5,8 @@ import (
 	"strings"
 )
 
+// BeginMarker and EndMarker delimit the tfparams-managed region in inject mode.
 const (
-	// BeginMarker / EndMarker delimit the tfparams-managed region in inject mode.
 	BeginMarker = "<!-- BEGIN_TFPARAMS -->"
 	EndMarker   = "<!-- END_TFPARAMS -->"
 )

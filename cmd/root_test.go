@@ -38,7 +38,8 @@ func TestRootCommandTableRoot(t *testing.T) {
 }
 
 func TestRootCommandModuleScope(t *testing.T) {
-	out, err := runCmd(t,
+	out, err := runCmd(
+		t,
 		"--plan-json", "../testdata/plan.json",
 		"--docs-json", "../testdata/docs_module.json",
 		"--scope", "module", "--module", "app",

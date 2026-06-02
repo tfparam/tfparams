@@ -248,7 +248,7 @@ func loadPlan(f *rootFlags) (*parser.Plan, error) {
 	if err != nil {
 		return nil, fmt.Errorf("open plan json: %w", err)
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 	return parser.ParsePlan(file)
 }
 
@@ -257,7 +257,7 @@ func readDocs(path string) (*parser.Docs, error) {
 	if err != nil {
 		return nil, fmt.Errorf("open docs json %s: %w", path, err)
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 	return parser.ParseDocs(file)
 }
 

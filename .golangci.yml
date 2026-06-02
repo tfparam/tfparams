@@ -1,0 +1,39 @@
+# golangci-lint v2 configuration (v2 is required to analyze a Go 1.25 module).
+version: "2"
+
+run:
+  timeout: 5m
+
+linters:
+  enable:
+    - errcheck      # エラーの握り潰しを検出
+    - govet         # 標準の静的解析
+    - staticcheck   # 高度な静的解析（gosimple/stylecheck を内包）
+    - ineffassign   # 無効な代入
+    - unused        # 未使用コード
+    - revive        # golint 後継のスタイルチェック
+    - gosec         # セキュリティ静的解析
+    - misspell      # スペルミス
+    - bodyclose     # HTTP レスポンスボディのクローズ漏れ（クラウド SDK 利用のため）
+  settings:
+    revive:
+      rules:
+        - name: exported
+          arguments: [checkPrivateReceivers]
+    misspell:
+      locale: US
+  exclusions:
+    rules:
+      # テストコードでは gosec の一部ルールを緩和
+      - path: _test\.go
+        linters:
+          - gosec
+
+# v2 では gofumpt/goimports は formatters セクションに移動
+formatters:
+  enable:
+    - gofumpt
+    - goimports
+  settings:
+    gofumpt:
+      extra-rules: true

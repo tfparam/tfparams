@@ -37,6 +37,6 @@ func fetchAzblob(ctx context.Context, s Source) ([]byte, error) {
 		return nil, fmt.Errorf("azblob: download %s/%s: %w", s.Container, s.Key, err)
 	}
 	body := resp.Body
-	defer body.Close()
+	defer func() { _ = body.Close() }()
 	return io.ReadAll(body)
 }

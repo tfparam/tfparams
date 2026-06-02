@@ -21,6 +21,6 @@ func fetchS3(ctx context.Context, s Source) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("s3: get s3://%s/%s: %w", s.Bucket, s.Key, err)
 	}
-	defer out.Body.Close()
+	defer func() { _ = out.Body.Close() }()
 	return io.ReadAll(out.Body)
 }

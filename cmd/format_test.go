@@ -34,7 +34,8 @@ func TestRootCommandJSON(t *testing.T) {
 }
 
 func TestRootCommandInjectRejectsNonTable(t *testing.T) {
-	_, err := runCmd(t,
+	_, err := runCmd(
+		t,
 		"--plan-json", "../testdata/plan.json",
 		"--docs-json", "../testdata/docs.json",
 		"--format", "csv", "--output-mode", "inject", "--out", "/tmp/tfparams_inject_test.md",
