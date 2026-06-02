@@ -60,9 +60,15 @@ func TestFetchLocal(t *testing.T) {
 	}
 }
 
-func TestFetchCloudNotImplemented(t *testing.T) {
-	_, err := Fetch(context.Background(), "s3://b/k/plan.json")
+func TestFetchLocalMissing(t *testing.T) {
+	_, err := Fetch(context.Background(), filepath.Join(t.TempDir(), "nope.json"))
 	if err == nil {
-		t.Fatal("expected not-implemented error for s3")
+		t.Fatal("expected error for missing local file")
+	}
+}
+
+func TestFetchUnsupportedScheme(t *testing.T) {
+	if _, err := Fetch(context.Background(), "ftp://host/path"); err == nil {
+		t.Fatal("expected error for unsupported scheme")
 	}
 }

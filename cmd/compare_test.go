@@ -35,13 +35,15 @@ func TestCompareRequiresTwoEnvs(t *testing.T) {
 	}
 }
 
-func TestCompareCloudBackendNotImplemented(t *testing.T) {
+func TestCompareUnsupportedScheme(t *testing.T) {
+	// ftp:// fails fast in URI parsing (no network), unlike s3/gs/azblob which
+	// would attempt a real fetch.
 	_, err := runCmd(t, "compare",
 		"--env", "dev=../testdata/plan_dev.json",
-		"--env", "prd=s3://bucket/prd/plan.json",
+		"--env", "prd=ftp://bucket/prd/plan.json",
 		"--docs-json", "../testdata/docs.json",
 	)
 	if err == nil {
-		t.Fatal("expected not-implemented error for s3 backend")
+		t.Fatal("expected error for unsupported scheme")
 	}
 }

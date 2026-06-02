@@ -7,7 +7,6 @@ import (
 	"context"
 	"fmt"
 	"net/url"
-	"os"
 	"strings"
 )
 
@@ -52,18 +51,22 @@ func Parse(uri string) (Source, error) {
 	return s, nil
 }
 
-// Fetch reads the bytes the URI points at. Local paths are read directly; cloud
-// schemes are not implemented yet (Track C-3).
-func Fetch(_ context.Context, uri string) ([]byte, error) {
+// Fetch reads the bytes the URI points at, dispatching on scheme. Cloud
+// credentials come from each SDK's default credential chain.
+func Fetch(ctx context.Context, uri string) ([]byte, error) {
 	s, err := Parse(uri)
 	if err != nil {
 		return nil, err
 	}
 	switch s.Scheme {
 	case "":
-		return os.ReadFile(s.Path) //nolint:gosec // path is user-provided input
-	case "s3", "gs", "azblob":
-		return nil, fmt.Errorf("backend %q is not implemented yet (Track C-3); use a local plan JSON path for now", s.Scheme)
+		return fetchLocal(s)
+	case "s3":
+		return fetchS3(ctx, s)
+	case "gs":
+		return fetchGCS(ctx, s)
+	case "azblob":
+		return fetchAzblob(ctx, s)
 	default:
 		return nil, fmt.Errorf("unsupported URI scheme %q", s.Scheme)
 	}
