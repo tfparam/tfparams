@@ -1,0 +1,24 @@
+{
+  "format_version": "1.2",
+  "terraform_version": "1.9.0",
+  "variables": {
+    "instance_type": { "value": "t3.xlarge" },
+    "replica_count": { "value": 3 },
+    "db_password": { "value": "s3cr3t" },
+    "multi_az": { "value": true }
+  },
+  "configuration": {
+    "root_module": {
+      "module_calls": {
+        "app": {
+          "source": "../../modules/app",
+          "expressions": {
+            "instance_type": { "references": ["var.instance_type", "var.instance_type"] },
+            "replica_count": { "constant_value": 3 },
+            "tags": { "references": ["local.tags"] }
+          }
+        }
+      }
+    }
+  }
+}

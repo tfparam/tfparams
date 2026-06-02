@@ -1,0 +1,25 @@
+{
+  "inputs": [
+    {
+      "name": "instance_type",
+      "type": "string",
+      "description": "Instance type",
+      "default": { "value": "t3.small" },
+      "required": false
+    },
+    {
+      "name": "replica_count",
+      "type": "number",
+      "description": "Replica count",
+      "default": { "value": 1 },
+      "required": false
+    },
+    {
+      "name": "tags",
+      "type": "map(string)",
+      "description": "Resource tags",
+      "default": null,
+      "required": true
+    }
+  ]
+}
