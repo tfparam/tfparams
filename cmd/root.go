@@ -111,8 +111,8 @@ func run(cmd *cobra.Command, f *rootFlags) error {
 	if f.recursive || changed("recursive") {
 		return fmt.Errorf("recursive mode is not implemented yet")
 	}
-	if format != "table" {
-		return fmt.Errorf("format %q is not implemented yet (only 'table' is available)", format)
+	if mode == "inject" && format != "table" {
+		return fmt.Errorf("inject mode requires --format table")
 	}
 	if len(f.docsJSON) == 0 {
 		return fmt.Errorf("--docs-json is required\n\n%s", cmd.UsageString())
@@ -156,7 +156,7 @@ func run(cmd *cobra.Command, f *rootFlags) error {
 		}
 	}
 
-	content := formatter.Markdown(params, formatter.Options{
+	opts := formatter.Options{
 		Env:           env,
 		Scope:         scope,
 		ModuleName:    moduleName,
@@ -164,7 +164,27 @@ func run(cmd *cobra.Command, f *rootFlags) error {
 		Source:        "terraform show -json tfplan (plan)",
 		ShowSensitive: showSensitive,
 		Columns:       cols,
-	})
+	}
+
+	var content string
+	switch format {
+	case "table":
+		content = formatter.Markdown(params, opts)
+	case "csv":
+		c, cerr := formatter.CSV(params, opts)
+		if cerr != nil {
+			return cerr
+		}
+		content = c
+	case "json":
+		c, cerr := formatter.JSON(params, opts)
+		if cerr != nil {
+			return cerr
+		}
+		content = c
+	default:
+		return fmt.Errorf("unknown format %q (want table, csv, or json)", format)
+	}
 
 	return writeOutput(cmd, out, mode, content)
 }

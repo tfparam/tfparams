@@ -124,14 +124,24 @@ func cell(key string, p merger.Param, o Options) string {
 }
 
 func appliedCell(p merger.Param, showSensitive bool) string {
-	if p.Sensitive && !showSensitive {
-		return "(sensitive)"
+	text, isValue := appliedString(p, showSensitive)
+	if isValue {
+		return "`" + text + "`"
 	}
-	if p.Computed {
-		return "(computed)"
+	return text
+}
+
+// appliedString returns the semantic applied value and whether it is a concrete
+// value (as opposed to a marker like "(sensitive)"). Shared by all formatters.
+func appliedString(p merger.Param, showSensitive bool) (text string, isValue bool) {
+	switch {
+	case p.Sensitive && !showSensitive:
+		return "(sensitive)", false
+	case p.Computed:
+		return "(computed)", false
+	case !p.HasApplied:
+		return "(not set)", false
+	default:
+		return p.Applied, true
 	}
-	if !p.HasApplied {
-		return "(not set)"
-	}
-	return "`" + p.Applied + "`"
 }
