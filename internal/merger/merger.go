@@ -36,8 +36,9 @@ type Param struct {
 
 // applied is an intermediate resolved value keyed by variable name.
 type applied struct {
-	value    string
-	computed bool
+	value     string
+	computed  bool
+	sensitive bool
 }
 
 // MergeInputs combines several terraform-docs documents, first-wins on name,
@@ -78,12 +79,15 @@ func Merge(plan *parser.Plan, inputs []parser.Input, scope Scope, module string)
 			Required:    in.Required,
 			Sensitive:   in.Sensitive,
 		}
-		if in.Default != nil {
+		if in.HasDefault() {
 			p.HasDefault = true
-			p.Default = parser.FormatValue(in.Default.Value)
+			p.Default = parser.FormatValue(in.Default)
 		}
 		if a, ok := values[in.Name]; ok {
 			applyValue(&p, a)
+			if a.sensitive {
+				p.Sensitive = true
+			}
 			used[in.Name] = true
 		}
 		params = append(params, p)
@@ -98,7 +102,7 @@ func Merge(plan *parser.Plan, inputs []parser.Input, scope Scope, module string)
 	}
 	sort.Strings(extra)
 	for _, name := range extra {
-		p := Param{Name: name}
+		p := Param{Name: name, Sensitive: values[name].sensitive}
 		applyValue(&p, values[name])
 		params = append(params, p)
 	}
@@ -121,7 +125,7 @@ func appliedValues(plan *parser.Plan, scope Scope, module string) (map[string]ap
 	case ScopeRoot, "":
 		m := make(map[string]applied, len(plan.Variables))
 		for name, v := range plan.Variables {
-			m[name] = applied{value: parser.FormatValue(v.Value)}
+			m[name] = applied{value: parser.FormatValue(v.Value), sensitive: plan.VarSensitive(name)}
 		}
 		return m, nil
 	case ScopeModule:
@@ -146,7 +150,7 @@ func resolveExpression(plan *parser.Plan, expr parser.Expression) applied {
 	}
 	if name, ok := singleVarRef(expr.References); ok {
 		if pv, exists := plan.Variables[name]; exists {
-			return applied{value: parser.FormatValue(pv.Value)}
+			return applied{value: parser.FormatValue(pv.Value), sensitive: plan.VarSensitive(name)}
 		}
 	}
 	return applied{computed: true}
