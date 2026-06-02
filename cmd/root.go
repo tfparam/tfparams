@@ -64,6 +64,8 @@ func NewRootCmd() *cobra.Command {
 	fl.BoolVar(&f.recursive, "recursive", false, "process subdirectories recursively")
 	fl.StringVar(&f.recursivePath, "recursive-path", ".", "root to scan in recursive mode")
 	fl.StringVar(&f.configPath, "config", "", "config file path (default: search .tfparams.yml)")
+
+	cmd.AddCommand(newCompareCmd())
 	return cmd
 }
 
