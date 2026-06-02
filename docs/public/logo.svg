@@ -1,4 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="tfparams">
-  <rect width="64" height="64" rx="12" fill="#7B42BC"/>
-  <text x="32" y="42" font-family="sans-serif" font-weight="700" font-size="26" fill="#ffffff" text-anchor="middle">tf</text>
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="tfparams logo mark">
+  <rect x="40" y="46" width="120" height="22" rx="7" fill="#9B6FD4"/>
+  <rect x="40" y="78" width="86" height="22" rx="7" fill="#7B42BC"/>
+  <rect x="40" y="110" width="120" height="22" rx="7" fill="#5E2E96"/>
+  <rect x="40" y="142" width="64" height="22" rx="7" fill="#7B42BC"/>
 </svg>

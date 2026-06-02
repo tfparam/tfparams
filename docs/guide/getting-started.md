@@ -37,11 +37,19 @@ terraform show -json tfplan | tfparams --docs-json <(terraform-docs json .)
 ## Variables
 
 | Name | Description | Type | Default | Applied Value | Required |
-|------|-------------|------|---------|---------------|----------|
+| --- | --- | --- | --- | --- | --- |
 | instance_type | EC2 instance type | `string` | `t3.medium` | `t3.xlarge` | - |
 | replica_count | RDS replica count | `number` | `1` | `3` | - |
-| db_password | Database password | `string` | - | `(sensitive)` | ✓ |
+| db_password | Database password | `string` | - | (sensitive) | ✓ |
 ```
+
+Rendered, that table looks like this:
+
+| Name | Description | Type | Default | Applied Value | Required |
+| --- | --- | --- | --- | --- | --- |
+| instance_type | EC2 instance type | `string` | `t3.medium` | `t3.xlarge` | - |
+| replica_count | RDS replica count | `number` | `1` | `3` | - |
+| db_password | Database password | `string` | - | (sensitive) | ✓ |
 
 ## Module-level view
 
@@ -64,8 +72,16 @@ tfparams compare \
 
 ```markdown
 | Name | Description | dev | stg | prd | Diff |
-|------|-------------|-----|-----|-----|------|
+| --- | --- | --- | --- | --- | --- |
 | instance_type | EC2 instance type | `t3.small` | `t3.medium` | `t3.xlarge` | ⚠️ |
 | replica_count | RDS replica count | `1` | `2` | `3` | ⚠️ |
-| db_password | Database password | `(sensitive)` | `(sensitive)` | `(sensitive)` | - |
+| db_password | Database password | (sensitive) | (sensitive) | (sensitive) | - |
 ```
+
+Rendered:
+
+| Name | Description | dev | stg | prd | Diff |
+| --- | --- | --- | --- | --- | --- |
+| instance_type | EC2 instance type | `t3.small` | `t3.medium` | `t3.xlarge` | ⚠️ |
+| replica_count | RDS replica count | `1` | `2` | `3` | ⚠️ |
+| db_password | Database password | (sensitive) | (sensitive) | (sensitive) | - |
