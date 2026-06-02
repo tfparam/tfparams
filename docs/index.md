@@ -1,0 +1,29 @@
+---
+layout: home
+
+hero:
+  name: tfparams
+  text: Terraform Parameter Sheet Generator
+  tagline: Merge Terraform plan values with variable metadata and output as Markdown.
+  image:
+    light: /logo-horizontal.svg
+    dark: /logo-horizontal-dark.svg
+    alt: tfparams
+  actions:
+    - theme: brand
+      text: Get Started
+      link: /guide/getting-started
+    - theme: alt
+      text: View on GitHub
+      link: https://github.com/tfparam/tfparams
+
+features:
+  - title: Plan-aware
+    details: Reads actual applied values from a Terraform plan (terraform show -json), including module-level passed values.
+  - title: Environment Comparison
+    details: Compare dev / staging / production side-by-side with diff highlighting.
+  - title: Multi-backend
+    details: Fetch each environment's plan JSON from S3, GCS, Azure Blob, or local files.
+  - title: CI/CD Ready
+    details: GitHub Actions, pre-commit hooks, and Docker image out of the box.
+---
