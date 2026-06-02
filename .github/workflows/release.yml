@@ -19,7 +19,12 @@ jobs:
         with:
           go-version-file: go.mod
 
-      - name: Generate changelog
+      # Build the release notes from this tag's commits. We do NOT push the
+      # changelog back to main here: the `branch_protect` ruleset blocks direct
+      # pushes from github-actions[bot] (only the repo owner can bypass), so a
+      # push step would fail the job before goreleaser runs. The docs Changelog
+      # page is updated via a normal PR instead.
+      - name: Generate release notes
         uses: orhun/git-cliff-action@v4
         with:
           config: cliff.toml
@@ -28,26 +33,11 @@ jobs:
           OUTPUT: CHANGELOG.md
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Sync changelog to docs and main
-        run: |
-          # Avoid pushing from the detached tag HEAD: check out main first.
-          cp CHANGELOG.md /tmp/CHANGELOG.md
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git fetch origin main
-          git checkout main
-          cp /tmp/CHANGELOG.md CHANGELOG.md
-          mkdir -p docs
-          cp CHANGELOG.md docs/changelog.md
-          git add docs/changelog.md CHANGELOG.md
-          git diff --staged --quiet || git commit -m "docs: sync changelog for ${{ github.ref_name }}"
-          git push origin main
-
       - name: Run goreleaser
         uses: goreleaser/goreleaser-action@v7
         with:
           version: latest
-          # Use git-cliff's CHANGELOG.md as the release body (Docker is in docker.yml).
+          # Docker images are built in docker.yml; goreleaser only ships binaries.
           args: release --clean --release-notes=CHANGELOG.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
