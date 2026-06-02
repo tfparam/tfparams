@@ -8,8 +8,10 @@ export default defineConfig({
     ['link', { rel: 'icon', type: 'image/svg+xml', href: '/tfparams/favicon.svg' }],
   ],
   themeConfig: {
-    // base 配下では themeConfig.logo に base が自動付与されないことがあるため明示する（VitePress issue #2981）
-    logo: '/tfparams/logo.svg',
+    // VitePress prepends `base` to themeConfig.logo automatically — pass a
+    // root-relative path WITHOUT the base prefix, or it doubles to
+    // /tfparams/tfparams/logo.svg and 404s.
+    logo: '/logo.svg',
     nav: [
       { text: 'Guide', link: '/guide/getting-started' },
       { text: 'Reference', link: '/reference/cli' },
