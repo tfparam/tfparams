@@ -40,7 +40,7 @@ func newCompareCmd() *cobra.Command {
 	fl.StringArrayVar(&f.envs, "env", nil, "name=<uri-or-path> to a plan JSON (repeat; at least two required)")
 	fl.StringArrayVar(&f.docsJSON, "docs-json", nil, "terraform-docs JSON, e.g. <(terraform-docs json .) (required, repeatable)")
 	fl.StringVar(&f.out, "out", "", "output file (overwritten); default stdout")
-	fl.StringVar(&f.format, "format", "table", "output format: table (csv/json TBD)")
+	fl.StringVar(&f.format, "format", "markdown", "output format: markdown (csv/json TBD)")
 	fl.BoolVar(&f.highlightDiff, "highlight-diff", true, "highlight rows that differ across environments")
 	fl.BoolVar(&f.showSensitive, "show-sensitive", false, "show sensitive values unmasked")
 	fl.StringVar(&f.sortBy, "sort-by", "required", "sort key: required (required first, then name) or name")
@@ -56,8 +56,8 @@ func runCompare(cmd *cobra.Command, f *compareFlags) error {
 	if len(f.docsJSON) == 0 {
 		return fmt.Errorf("--docs-json is required")
 	}
-	if f.format != "table" {
-		return fmt.Errorf("format %q is not implemented for compare yet (only 'table')", f.format)
+	if f.format != "markdown" && f.format != "table" {
+		return fmt.Errorf("format %q is not implemented for compare yet (only 'markdown')", f.format)
 	}
 
 	var docs []*parser.Docs

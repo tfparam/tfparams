@@ -47,9 +47,6 @@ func MergeInputs(docs ...*parser.Docs) []parser.Input {
 	var out []parser.Input
 	seen := map[string]bool{}
 	for _, d := range docs {
-		if d == nil {
-			continue
-		}
 		for _, in := range d.Inputs {
 			if seen[in.Name] {
 				continue

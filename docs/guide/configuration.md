@@ -1,17 +1,12 @@
 # Configuration
 
-tfparams reads `.tfparams.yml` and lets CLI flags override it. The file is searched
-in this order (first match wins), unless `--config` is given:
-
-1. `--config <path>`
-2. `./.tfparams.yml`
-3. `./.config/.tfparams.yml`
-4. `$HOME/.tfparams.d/.tfparams.yml`
+tfparams reads `./.tfparams.yml` (if present) and lets CLI flags override it.
+Pass `--config <path>` to load a file from any other location.
 
 ## Full schema
 
 ```yaml
-format: table            # table / csv / json
+format: markdown         # markdown / csv / json
 env: production
 scope: root              # root / module
 module: ""               # module call name when scope: module (empty = auto-select)

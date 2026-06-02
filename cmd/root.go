@@ -56,7 +56,7 @@ func NewRootCmd() *cobra.Command {
 	fl.StringVar(&f.scope, "scope", "root", "scope: root or module")
 	fl.StringVar(&f.module, "module", "", "module call name for --scope module")
 	fl.StringVar(&f.out, "out", "", "output file (overwritten); default stdout")
-	fl.StringVar(&f.format, "format", "table", "output format: table, csv, or json")
+	fl.StringVar(&f.format, "format", "markdown", "output format: markdown, csv, or json")
 	fl.StringVar(&f.env, "env", "", "environment name shown in the header")
 	fl.BoolVar(&f.showSensitive, "show-sensitive", false, "show sensitive values unmasked")
 	fl.BoolVar(&f.noDefaultCol, "no-default-col", false, "hide the Default column")
@@ -143,7 +143,7 @@ func resolveSettings(cmd *cobra.Command, f *rootFlags, cfg config.Config) settin
 		s.scope = "root"
 	}
 	if s.format == "" {
-		s.format = "table"
+		s.format = "markdown"
 	}
 	if s.sortBy == "" {
 		s.sortBy = "required"
@@ -193,14 +193,14 @@ func buildContent(plan *parser.Plan, s settings) (string, error) {
 		Columns:       s.cols,
 	}
 	switch s.format {
-	case "table":
+	case "markdown", "table": // "table" kept as a backward-compatible alias
 		return formatter.Markdown(params, opts), nil
 	case "csv":
 		return formatter.CSV(params, opts)
 	case "json":
 		return formatter.JSON(params, opts)
 	default:
-		return "", fmt.Errorf("unknown format %q (want table, csv, or json)", s.format)
+		return "", fmt.Errorf("unknown format %q (want markdown, csv, or json)", s.format)
 	}
 }
 

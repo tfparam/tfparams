@@ -5,7 +5,6 @@ package config
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 
 	"gopkg.in/yaml.v3"
 )
@@ -53,7 +52,7 @@ type Recursive struct {
 // Default returns a Config populated with tfparams' built-in defaults.
 func Default() Config {
 	return Config{
-		Format: "table",
+		Format: "markdown",
 		Scope:  "root",
 		Columns: Columns{Show: []string{
 			"name", "description", "type", "default", "applied_value", "required",
@@ -64,17 +63,10 @@ func Default() Config {
 	}
 }
 
-// SearchPaths is the ordered list of locations probed when no explicit
-// --config path is given.
+// SearchPaths is the location probed when no explicit --config path is given:
+// just .tfparams.yml in the current directory. Anything else is passed via --config.
 func SearchPaths() []string {
-	paths := []string{
-		".tfparams.yml",
-		filepath.Join(".config", ".tfparams.yml"),
-	}
-	if home, err := os.UserHomeDir(); err == nil {
-		paths = append(paths, filepath.Join(home, ".tfparams.d", ".tfparams.yml"))
-	}
-	return paths
+	return []string{".tfparams.yml"}
 }
 
 // Load reads the config file. When explicit is non-empty it must exist;

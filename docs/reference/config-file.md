@@ -5,15 +5,15 @@
 ## Search order
 
 1. `--config <path>` (explicit)
-2. `./.tfparams.yml`
-3. `./.config/.tfparams.yml`
-4. `$HOME/.tfparams.d/.tfparams.yml`
+2. `./.tfparams.yml` (current directory)
+
+Built-in defaults apply when no file is found.
 
 ## Keys
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| `format` | string | `table` | Output format: `table` / `csv` / `json` |
+| `format` | string | `markdown` | Output format: `markdown` / `csv` / `json` |
 | `env` | string | - | Environment name in the header |
 | `scope` | string | `root` | `root` / `module` |
 | `module` | string | `""` | Module call name when `scope: module` (empty = auto) |
@@ -28,7 +28,7 @@
 ## Example
 
 ```yaml
-format: table
+format: markdown
 env: production
 scope: module
 module: app

@@ -11,7 +11,7 @@ Generate a parameter sheet from a plan JSON and terraform-docs metadata.
 | `--scope` | `root` | `root` (root variables) / `module` (module-passed values) |
 | `--module` | (auto) | Module call name when `--scope module` |
 | `--out` | stdout | Output file path (overwritten if it exists) |
-| `--format` | `table` | `table` / `csv` / `json` |
+| `--format` | `markdown` | `markdown` / `csv` / `json` |
 | `--env` | - | Environment name shown in the header |
 | `--show-sensitive` | false | Show sensitive values unmasked |
 | `--no-default-col` | false | Hide the Default column |
@@ -31,7 +31,7 @@ Compare applied values across environments and highlight differences.
 | `--scope` | `root` | `root` / `module` |
 | `--module` | (auto) | Module call name when `--scope module` |
 | `--out` | stdout | Output file path (overwritten if it exists) |
-| `--format` | `table` | `table` |
+| `--format` | `markdown` | `markdown` |
 | `--highlight-diff` | true | Highlight differing rows with ⚠️ |
 | `--show-sensitive` | false | Show sensitive values unmasked |
 | `--sort-by` | `required` | `required` (required first, then name) / `name` |
