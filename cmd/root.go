@@ -74,49 +74,98 @@ func NewRootCmd() *cobra.Command {
 // Execute runs the root command.
 func Execute() error { return NewRootCmd().Execute() }
 
-func run(cmd *cobra.Command, f *rootFlags) error {
-	changed := func(name string) bool { return cmd.Flags().Changed(name) }
+// settings holds the effective configuration after merging file config and flags.
+type settings struct {
+	env, scope, module, format, mode, out, sortBy, source string
+	showSensitive, sortEnabled, recursive                 bool
+	recursivePath, planFile                               string
+	cols                                                  []string
+	docs                                                  []*parser.Docs
+}
 
-	explicitConfig := ""
-	if changed("config") {
-		explicitConfig = f.configPath
-	}
-	cfg, _, err := config.Load(explicitConfig)
+func run(cmd *cobra.Command, f *rootFlags) error {
+	cfg, err := loadRootConfig(cmd, f)
 	if err != nil {
 		return err
-	}
-
-	env := pick(changed("env"), f.env, cfg.Env)
-	scope := pick(changed("scope"), f.scope, cfg.Scope)
-	if scope == "" {
-		scope = "root"
-	}
-	module := pick(changed("module"), f.module, cfg.Module)
-	format := pick(changed("format"), f.format, cfg.Format)
-	if format == "" {
-		format = "table"
-	}
-	mode := pick(changed("output-mode"), f.outputMode, cfg.Output.Mode)
-	if mode == "" {
-		mode = "standalone"
-	}
-	out := pick(changed("out"), f.out, cfg.Output.File)
-	sortBy := pick(changed("sort-by"), f.sortBy, cfg.Sort.By)
-	showSensitive := cfg.Sensitive.Show
-	if changed("show-sensitive") {
-		showSensitive = f.showSensitive
-	}
-	sortEnabled := cfg.Sort.Enabled || changed("sort-by")
-
-	if f.recursive || changed("recursive") {
-		return fmt.Errorf("recursive mode is not implemented yet")
-	}
-	if mode == "inject" && format != "table" {
-		return fmt.Errorf("inject mode requires --format table")
 	}
 	if len(f.docsJSON) == 0 {
 		return fmt.Errorf("--docs-json is required\n\n%s", cmd.UsageString())
 	}
+	docs, err := loadDocs(f)
+	if err != nil {
+		return err
+	}
+
+	s := resolveSettings(cmd, f, cfg)
+	s.docs = docs
+
+	if s.mode == "inject" && s.format != "table" {
+		return fmt.Errorf("inject mode requires --format table")
+	}
+
+	if s.recursive {
+		return runRecursive(cmd, f, cfg, s)
+	}
+	return runSingle(cmd, f, s)
+}
+
+func loadRootConfig(cmd *cobra.Command, f *rootFlags) (config.Config, error) {
+	explicit := ""
+	if cmd.Flags().Changed("config") {
+		explicit = f.configPath
+	}
+	cfg, _, err := config.Load(explicit)
+	return cfg, err
+}
+
+func loadDocs(f *rootFlags) ([]*parser.Docs, error) {
+	var docs []*parser.Docs
+	for _, path := range f.docsJSON {
+		d, err := readDocs(path)
+		if err != nil {
+			return nil, err
+		}
+		docs = append(docs, d)
+	}
+	return docs, nil
+}
+
+// resolveSettings computes effective settings from cfg and CLI flags (flags win).
+func resolveSettings(cmd *cobra.Command, f *rootFlags, cfg config.Config) settings {
+	changed := func(name string) bool { return cmd.Flags().Changed(name) }
+	s := settings{
+		env:           pick(changed("env"), f.env, cfg.Env),
+		scope:         pick(changed("scope"), f.scope, cfg.Scope),
+		module:        pick(changed("module"), f.module, cfg.Module),
+		format:        pick(changed("format"), f.format, cfg.Format),
+		mode:          pick(changed("output-mode"), f.outputMode, cfg.Output.Mode),
+		out:           pick(changed("out"), f.out, cfg.Output.File),
+		sortBy:        pick(changed("sort-by"), f.sortBy, cfg.Sort.By),
+		source:        "terraform show -json tfplan (plan)",
+		recursive:     f.recursive || changed("recursive") || cfg.Recursive.Enabled,
+		recursivePath: pick(changed("recursive-path"), f.recursivePath, cfg.Recursive.Path),
+		planFile:      cfg.Recursive.PlanFile,
+	}
+	if s.scope == "" {
+		s.scope = "root"
+	}
+	if s.format == "" {
+		s.format = "table"
+	}
+	if s.mode == "" {
+		s.mode = "standalone"
+	}
+	if s.recursivePath == "" {
+		s.recursivePath = "."
+	}
+	if s.planFile == "" {
+		s.planFile = "tfplan.json"
+	}
+	s.showSensitive = cfg.Sensitive.Show
+	if changed("show-sensitive") {
+		s.showSensitive = f.showSensitive
+	}
+	s.sortEnabled = cfg.Sort.Enabled || changed("sort-by")
 
 	cols := cfg.Columns.Show
 	if len(cols) == 0 {
@@ -125,68 +174,56 @@ func run(cmd *cobra.Command, f *rootFlags) error {
 	if f.noDefaultCol {
 		cols = removeString(cols, "default")
 	}
+	s.cols = cols
+	return s
+}
 
+func buildContent(plan *parser.Plan, s settings) (string, error) {
+	inputs := merger.MergeInputs(s.docs...)
+	params, err := merger.Merge(plan, inputs, merger.Scope(s.scope), s.module)
+	if err != nil {
+		return "", err
+	}
+	if s.sortEnabled {
+		sortParams(params, s.sortBy)
+	}
+	moduleName := ""
+	if s.scope == "module" {
+		if moduleName, err = merger.ModuleName(plan, s.module); err != nil {
+			return "", err
+		}
+	}
+	opts := formatter.Options{
+		Env:           s.env,
+		Scope:         s.scope,
+		ModuleName:    moduleName,
+		GeneratedAt:   time.Now().Format("2006-01-02 15:04:05 MST"),
+		Source:        s.source,
+		ShowSensitive: s.showSensitive,
+		Columns:       s.cols,
+	}
+	switch s.format {
+	case "table":
+		return formatter.Markdown(params, opts), nil
+	case "csv":
+		return formatter.CSV(params, opts)
+	case "json":
+		return formatter.JSON(params, opts)
+	default:
+		return "", fmt.Errorf("unknown format %q (want table, csv, or json)", s.format)
+	}
+}
+
+func runSingle(cmd *cobra.Command, f *rootFlags, s settings) error {
 	plan, err := loadPlan(f)
 	if err != nil {
 		return err
 	}
-
-	var docsList []*parser.Docs
-	for _, path := range f.docsJSON {
-		d, derr := readDocs(path)
-		if derr != nil {
-			return derr
-		}
-		docsList = append(docsList, d)
-	}
-	inputs := merger.MergeInputs(docsList...)
-
-	params, err := merger.Merge(plan, inputs, merger.Scope(scope), module)
+	content, err := buildContent(plan, s)
 	if err != nil {
 		return err
 	}
-	if sortEnabled {
-		sortParams(params, sortBy)
-	}
-
-	moduleName := ""
-	if scope == "module" {
-		if moduleName, err = merger.ModuleName(plan, module); err != nil {
-			return err
-		}
-	}
-
-	opts := formatter.Options{
-		Env:           env,
-		Scope:         scope,
-		ModuleName:    moduleName,
-		GeneratedAt:   time.Now().Format("2006-01-02 15:04:05 MST"),
-		Source:        "terraform show -json tfplan (plan)",
-		ShowSensitive: showSensitive,
-		Columns:       cols,
-	}
-
-	var content string
-	switch format {
-	case "table":
-		content = formatter.Markdown(params, opts)
-	case "csv":
-		c, cerr := formatter.CSV(params, opts)
-		if cerr != nil {
-			return cerr
-		}
-		content = c
-	case "json":
-		c, cerr := formatter.JSON(params, opts)
-		if cerr != nil {
-			return cerr
-		}
-		content = c
-	default:
-		return fmt.Errorf("unknown format %q (want table, csv, or json)", format)
-	}
-
-	return writeOutput(cmd, out, mode, content)
+	return writeOutput(cmd, s.out, s.mode, content)
 }
 
 // pick returns flagVal when the flag was changed, otherwise cfgVal.
@@ -223,23 +260,27 @@ func readDocs(path string) (*parser.Docs, error) {
 }
 
 func writeOutput(cmd *cobra.Command, out, mode, content string) error {
-	switch mode {
-	case "standalone", "replace":
-		if out == "" {
-			_, err := io.WriteString(cmd.OutOrStdout(), content)
-			return err
-		}
-		return os.WriteFile(out, []byte(content), 0o644) //nolint:gosec // sheet is meant to be world-readable
-	case "inject":
-		if out == "" {
+	if out == "" {
+		if mode == "inject" {
 			return fmt.Errorf("inject mode requires --out")
 		}
-		existing, _ := os.ReadFile(out) //nolint:gosec // missing file is fine (treated as empty)
+		_, err := io.WriteString(cmd.OutOrStdout(), content)
+		return err
+	}
+	return writeToFile(out, mode, content)
+}
+
+func writeToFile(path, mode, content string) error {
+	switch mode {
+	case "standalone", "replace":
+		return os.WriteFile(path, []byte(content), 0o644) //nolint:gosec // sheet is meant to be world-readable
+	case "inject":
+		existing, _ := os.ReadFile(path) //nolint:gosec // missing file is fine (treated as empty)
 		result, err := formatter.Inject(string(existing), content)
 		if err != nil {
 			return err
 		}
-		return os.WriteFile(out, []byte(result), 0o644) //nolint:gosec // sheet is meant to be world-readable
+		return os.WriteFile(path, []byte(result), 0o644) //nolint:gosec // sheet is meant to be world-readable
 	default:
 		return fmt.Errorf("unknown output-mode %q (want standalone, inject, or replace)", mode)
 	}

@@ -106,6 +106,16 @@ func Load(explicit string) (cfg Config, found bool, err error) {
 	return cfg, false, nil
 }
 
+// Overlay returns a copy of base with the YAML at path merged on top. Used by
+// recursive mode to apply a subdirectory's .tfparams.yml over the root config.
+func Overlay(base Config, path string) (Config, error) {
+	out := base
+	if err := loadInto(path, &out); err != nil {
+		return base, err
+	}
+	return out, nil
+}
+
 func loadInto(path string, cfg *Config) error {
 	data, err := os.ReadFile(path) //nolint:gosec // path is user-provided config
 	if err != nil {
