@@ -23,13 +23,13 @@ const planJSON = `{
 }`
 
 const docsJSON = `{"inputs":[
-  {"name":"instance_type","type":"string","description":"EC2","default":{"value":"t3.medium"},"required":false},
-  {"name":"replica_count","type":"number","description":"replicas","default":{"value":1},"required":false}
+  {"name":"instance_type","type":"string","description":"EC2","default":"t3.medium","required":false},
+  {"name":"replica_count","type":"number","description":"replicas","default":1,"required":false}
 ]}`
 
 const docsModuleJSON = `{"inputs":[
-  {"name":"instance_type","type":"string","description":"type","default":{"value":"t3.small"},"required":false},
-  {"name":"replica_count","type":"number","description":"count","default":{"value":1},"required":false},
+  {"name":"instance_type","type":"string","description":"type","default":"t3.small","required":false},
+  {"name":"replica_count","type":"number","description":"count","default":1,"required":false},
   {"name":"tags","type":"map(string)","description":"tags","default":null,"required":true}
 ]}`
 
@@ -137,5 +137,27 @@ func TestMergeAppliedOnlyAppended(t *testing.T) {
 	}
 	if len(params) != 2 || params[0].Name != "instance_type" || params[1].Name != "replica_count" {
 		t.Errorf("unexpected params: %+v", params)
+	}
+}
+
+func TestMergeSensitiveFromPlanConfig(t *testing.T) {
+	// terraform plan does NOT redact sensitive values, and terraform-docs often
+	// reports sensitive=null. The plan configuration's `sensitive` flag is the
+	// reliable signal; verify it marks the param sensitive even when docs do not.
+	plan := mustPlan(t, `{
+      "variables":{"db_password":{"value":"secret"}},
+      "configuration":{"root_module":{
+        "variables":{"db_password":{"sensitive":true}},
+        "module_calls":{}
+      }}
+    }`)
+	inputs := MergeInputs(mustDocs(t, `{"inputs":[{"name":"db_password","type":"string"}]}`))
+	params, err := Merge(plan, inputs, ScopeRoot, "")
+	if err != nil {
+		t.Fatalf("Merge: %v", err)
+	}
+	p, ok := find(params, "db_password")
+	if !ok || !p.Sensitive {
+		t.Errorf("db_password should be sensitive from plan config: %+v", p)
 	}
 }

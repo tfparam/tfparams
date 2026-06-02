@@ -40,9 +40,27 @@ type Configuration struct {
 	RootModule RootModule `json:"root_module"`
 }
 
-// RootModule holds the module calls made from the root module.
+// RootModule holds the module calls and variable declarations of the root module.
 type RootModule struct {
-	ModuleCalls map[string]ModuleCall `json:"module_calls"`
+	ModuleCalls map[string]ModuleCall     `json:"module_calls"`
+	Variables   map[string]ConfigVariable `json:"variables"`
+}
+
+// ConfigVariable is a variable declaration from
+// plan.configuration.root_module.variables. terraform plan output does NOT
+// redact sensitive variable values, so this `sensitive` flag is the reliable
+// signal for masking (terraform-docs does not always report it).
+type ConfigVariable struct {
+	Description string          `json:"description"`
+	Sensitive   bool            `json:"sensitive"`
+	Default     json.RawMessage `json:"default"`
+}
+
+// VarSensitive reports whether the named root variable is declared sensitive in
+// the plan's configuration block.
+func (p *Plan) VarSensitive(name string) bool {
+	v, ok := p.Configuration.RootModule.Variables[name]
+	return ok && v.Sensitive
 }
 
 // ModuleCall is a single `module "<name>" {}` block in the root module.
