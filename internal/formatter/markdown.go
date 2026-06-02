@@ -4,6 +4,7 @@ package formatter
 import (
 	"strings"
 
+	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/tfparam/tfparams/internal/merger"
 )
 
@@ -63,31 +64,22 @@ func Markdown(params []merger.Param, o Options) string {
 	}
 	b.WriteString(heading + "\n\n")
 
-	// Header row.
-	b.WriteString("| ")
+	// Render the table with go-pretty (Markdown mode).
+	tw := table.NewWriter()
+	header := make(table.Row, len(cols))
 	for i, c := range cols {
-		if i > 0 {
-			b.WriteString(" | ")
-		}
-		b.WriteString(columnHeaders[c])
+		header[i] = columnHeaders[c]
 	}
-	b.WriteString(" |\n|")
-	for range cols {
-		b.WriteString("------|")
-	}
-	b.WriteString("\n")
-
-	// Body rows.
+	tw.AppendHeader(header)
 	for _, p := range params {
-		b.WriteString("| ")
+		row := make(table.Row, len(cols))
 		for i, c := range cols {
-			if i > 0 {
-				b.WriteString(" | ")
-			}
-			b.WriteString(cell(c, p, o))
+			row[i] = cell(c, p, o)
 		}
-		b.WriteString(" |\n")
+		tw.AppendRow(row)
 	}
+	b.WriteString(tw.RenderMarkdown())
+	b.WriteString("\n")
 
 	return b.String()
 }

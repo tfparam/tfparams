@@ -22,12 +22,10 @@ func SetVersion(v string) { version = v }
 
 type rootFlags struct {
 	planJSON      string
-	stateJSON     string
 	docsJSON      []string
 	scope         string
 	module        string
 	out           string
-	outputMode    string
 	format        string
 	env           string
 	showSensitive bool
@@ -54,12 +52,10 @@ func NewRootCmd() *cobra.Command {
 	}
 	fl := cmd.Flags()
 	fl.StringVar(&f.planJSON, "plan-json", "", "plan JSON file (terraform show -json <planfile>); default stdin")
-	fl.StringVar(&f.stateJSON, "state-json", "", "deprecated alias for --plan-json")
-	fl.StringArrayVar(&f.docsJSON, "docs-json", nil, "terraform-docs json output file (required, repeatable)")
+	fl.StringArrayVar(&f.docsJSON, "docs-json", nil, "terraform-docs JSON, e.g. <(terraform-docs json .) (required, repeatable)")
 	fl.StringVar(&f.scope, "scope", "root", "scope: root or module")
 	fl.StringVar(&f.module, "module", "", "module call name for --scope module")
-	fl.StringVar(&f.out, "out", "", "output file; default stdout")
-	fl.StringVar(&f.outputMode, "output-mode", "standalone", "output mode: standalone, inject, or replace")
+	fl.StringVar(&f.out, "out", "", "output file (overwritten); default stdout")
 	fl.StringVar(&f.format, "format", "table", "output format: table, csv, or json")
 	fl.StringVar(&f.env, "env", "", "environment name shown in the header")
 	fl.BoolVar(&f.showSensitive, "show-sensitive", false, "show sensitive values unmasked")
@@ -96,10 +92,6 @@ func run(cmd *cobra.Command, f *rootFlags) error {
 	if format == "" {
 		format = "table"
 	}
-	mode := pick(changed("output-mode"), f.outputMode, cfg.Output.Mode)
-	if mode == "" {
-		mode = "standalone"
-	}
 	out := pick(changed("out"), f.out, cfg.Output.File)
 	sortBy := pick(changed("sort-by"), f.sortBy, cfg.Sort.By)
 	showSensitive := cfg.Sensitive.Show
@@ -110,9 +102,6 @@ func run(cmd *cobra.Command, f *rootFlags) error {
 
 	if f.recursive || changed("recursive") {
 		return fmt.Errorf("recursive mode is not implemented yet")
-	}
-	if mode == "inject" && format != "table" {
-		return fmt.Errorf("inject mode requires --format table")
 	}
 	if len(f.docsJSON) == 0 {
 		return fmt.Errorf("--docs-json is required\n\n%s", cmd.UsageString())
@@ -186,7 +175,7 @@ func run(cmd *cobra.Command, f *rootFlags) error {
 		return fmt.Errorf("unknown format %q (want table, csv, or json)", format)
 	}
 
-	return writeOutput(cmd, out, mode, content)
+	return writeOutput(cmd, out, content)
 }
 
 // pick returns flagVal when the flag was changed, otherwise cfgVal.
@@ -198,18 +187,14 @@ func pick(changed bool, flagVal, cfgVal string) string {
 }
 
 func loadPlan(f *rootFlags) (*parser.Plan, error) {
-	path := f.planJSON
-	if path == "" {
-		path = f.stateJSON
-	}
-	if path == "" {
+	if f.planJSON == "" {
 		return parser.ParsePlan(os.Stdin)
 	}
-	file, err := os.Open(path) //nolint:gosec // path is user-provided input
+	file, err := os.Open(f.planJSON) //nolint:gosec // path is user-provided input
 	if err != nil {
 		return nil, fmt.Errorf("open plan json: %w", err)
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 	return parser.ParsePlan(file)
 }
 
@@ -218,31 +203,17 @@ func readDocs(path string) (*parser.Docs, error) {
 	if err != nil {
 		return nil, fmt.Errorf("open docs json %s: %w", path, err)
 	}
-	defer file.Close()
+	defer func() { _ = file.Close() }()
 	return parser.ParseDocs(file)
 }
 
-func writeOutput(cmd *cobra.Command, out, mode, content string) error {
-	switch mode {
-	case "standalone", "replace":
-		if out == "" {
-			_, err := io.WriteString(cmd.OutOrStdout(), content)
-			return err
-		}
-		return os.WriteFile(out, []byte(content), 0o644) //nolint:gosec // sheet is meant to be world-readable
-	case "inject":
-		if out == "" {
-			return fmt.Errorf("inject mode requires --out")
-		}
-		existing, _ := os.ReadFile(out) //nolint:gosec // missing file is fine (treated as empty)
-		result, err := formatter.Inject(string(existing), content)
-		if err != nil {
-			return err
-		}
-		return os.WriteFile(out, []byte(result), 0o644) //nolint:gosec // sheet is meant to be world-readable
-	default:
-		return fmt.Errorf("unknown output-mode %q (want standalone, inject, or replace)", mode)
+// writeOutput writes to stdout when out is empty, otherwise overwrites the file.
+func writeOutput(cmd *cobra.Command, out, content string) error {
+	if out == "" {
+		_, err := io.WriteString(cmd.OutOrStdout(), content)
+		return err
 	}
+	return os.WriteFile(out, []byte(content), 0o644) //nolint:gosec // sheet is meant to be world-readable
 }
 
 func sortParams(params []merger.Param, by string) {
