@@ -1,0 +1,8 @@
+# Terraform generated artifacts (not committed on this scratch branch)
+.terraform/
+.terraform.lock.hcl
+tfplan
+tfplan.json
+*.tfstate
+*.tfstate.*
+crash.log
