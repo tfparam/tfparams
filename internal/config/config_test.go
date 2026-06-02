@@ -8,8 +8,8 @@ import (
 
 func TestDefault(t *testing.T) {
 	c := Default()
-	if c.Format != "table" {
-		t.Errorf("Format = %q, want table", c.Format)
+	if c.Format != "markdown" {
+		t.Errorf("Format = %q, want markdown", c.Format)
 	}
 	if c.Scope != "root" {
 		t.Errorf("Scope = %q, want root", c.Scope)
@@ -17,8 +17,8 @@ func TestDefault(t *testing.T) {
 	if c.Recursive.Path != "." {
 		t.Errorf("Recursive.Path = %q, want .", c.Recursive.Path)
 	}
-	if c.Sensitive.Mask != "(sensitive)" {
-		t.Errorf("Sensitive.Mask = %q", c.Sensitive.Mask)
+	if c.Sort.By != "required" {
+		t.Errorf("Sort.By = %q, want required", c.Sort.By)
 	}
 }
 
@@ -37,8 +37,8 @@ func TestLoadExplicit(t *testing.T) {
 		t.Errorf("loaded config = %+v", c)
 	}
 	// Defaults must be preserved for unspecified keys.
-	if c.Sensitive.Mask != "(sensitive)" {
-		t.Errorf("default mask lost: %q", c.Sensitive.Mask)
+	if c.Sort.By != "required" {
+		t.Errorf("default sort lost: %q", c.Sort.By)
 	}
 }
 
@@ -50,9 +50,8 @@ func TestLoadExplicitMissing(t *testing.T) {
 }
 
 func TestLoadSearchNotFound(t *testing.T) {
-	// Run from an empty dir (and isolated HOME) so no .tfparams.yml is discovered.
+	// Run from an empty dir so no .tfparams.yml is discovered.
 	dir := t.TempDir()
-	t.Setenv("HOME", dir)
 	wd, _ := os.Getwd()
 	defer func() { _ = os.Chdir(wd) }()
 	if err := os.Chdir(dir); err != nil {
@@ -65,7 +64,7 @@ func TestLoadSearchNotFound(t *testing.T) {
 	if found {
 		t.Errorf("did not expect to find a config in empty dir")
 	}
-	if c.Format != "table" {
+	if c.Format != "markdown" {
 		t.Errorf("expected defaults, got %+v", c)
 	}
 }

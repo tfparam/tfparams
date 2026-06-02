@@ -1,8 +1,16 @@
-# tfparams
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/public/logo-horizontal-dark.svg">
+    <img src="docs/public/logo-horizontal.svg" alt="tfparams" width="320">
+  </picture>
+</p>
 
-Generate Markdown / CSV / JSON **parameter sheets** for Terraform by merging the
-**applied input-variable values from a plan** with **variable metadata from
-terraform-docs**.
+<p align="center">
+  Generate Markdown / CSV / JSON <strong>parameter sheets</strong> for Terraform by merging
+  the <strong>applied input-variable values from a plan</strong> with <strong>variable metadata from terraform-docs</strong>.
+</p>
+
+📖 **Documentation:** <https://tfparam.github.io/tfparams>
 
 ---
 
@@ -92,9 +100,9 @@ terraform show -json tfplan | tfparams --docs-json <(terraform-docs json .)
 
 | Name | Description | Type | Default | Applied Value | Required |
 | --- | --- | --- | --- | --- | --- |
+| db_password | Database password | `string` | - | (sensitive) | ✓ |
 | instance_type | EC2 instance type | `string` | `t3.medium` | `t3.xlarge` | - |
 | replica_count | RDS replica count | `number` | `1` | `3` | - |
-| db_password | Database password | `string` | - | (sensitive) | ✓ |
 ```
 
 ### Module-level view
@@ -106,9 +114,32 @@ tfparams --plan-json plan.json --scope module --module app \
   --docs-json <(terraform-docs json ../../modules/app/)
 ```
 
+### Compare environments
+
+```bash
+tfparams compare \
+  --docs-json <(terraform-docs json ./modules/app/) \
+  --env dev=s3://my-bucket/env/dev/plan.json \
+  --env stg=s3://my-bucket/env/stg/plan.json \
+  --env prd=s3://my-bucket/env/prd/plan.json
+```
+
+```markdown
+# Environment Comparison
+
+| Name | Description | dev | stg | prd | Diff |
+|------|-------------|-----|-----|-----|------|
+| instance_type | EC2 instance type | `t3.small` | `t3.medium` | `t3.xlarge` | ⚠️ |
+| replica_count | RDS replica count | `1` | `2` | `3` | ⚠️ |
+| db_password | Database password | `(sensitive)` | `(sensitive)` | `(sensitive)` | - |
+```
+
+`--env` values are **plan JSON** files; the scheme (`s3://` / `gs://` / `azblob://` / local)
+only selects how the bytes are fetched, using each cloud SDK's default credentials.
+
 ### Output formats
 
-`--format table` (default, Markdown) · `--format csv` · `--format json`.
+`--format markdown` (default) · `--format csv` · `--format json`.
 
 ### Write to a file
 
@@ -118,14 +149,34 @@ tfparams --plan-json plan.json --docs-json docs.json --out PARAMETERS.md
 
 `--out` overwrites the file; without it, output goes to stdout.
 
-## Configuration (`.tfparams.yml`)
-
-Searched in order (first match wins) unless `--config` is given:
-`./.tfparams.yml` → `./.config/.tfparams.yml` → `$HOME/.tfparams.d/.tfparams.yml`.
-CLI flags override the file.
+### CI/CD
 
 ```yaml
-format: table            # table / csv / json
+# GitHub Actions (composite action)
+- uses: tfparam/tfparams@v0.1.0
+  with:
+    plan-json: plan.json
+    docs-json: docs.json
+    output-file: PARAMETERS.md
+```
+
+```yaml
+# pre-commit
+repos:
+  - repo: https://github.com/tfparam/tfparams
+    rev: "v0.1.0"
+    hooks:
+      - id: tfparams
+        args: ["--out", "PARAMETERS.md"]
+```
+
+## Configuration (`.tfparams.yml`)
+
+Read from `./.tfparams.yml` if present (built-in defaults otherwise). Pass
+`--config <path>` to load any other file. CLI flags override file values.
+
+```yaml
+format: markdown         # markdown / csv / json
 env: production
 scope: root              # root / module
 module: ""               # module call name when scope: module (empty = auto)
@@ -134,10 +185,16 @@ output:
 columns:
   show: [name, description, type, default, applied_value, required]
 sort:
-  by: name                # name / required / type
+  by: required            # required (required first, then name) / name
 sensitive:
   show: false
+recursive:
+  enabled: false
+  path: .                 # scan root (env dir by default)
+  plan_file: tfplan.json  # plan JSON filename per subdirectory
 ```
+
+See the [configuration reference](https://tfparam.github.io/tfparams/reference/config-file) for every key.
 
 ## License
 

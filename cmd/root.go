@@ -56,11 +56,11 @@ func NewRootCmd() *cobra.Command {
 	fl.StringVar(&f.scope, "scope", "root", "scope: root or module")
 	fl.StringVar(&f.module, "module", "", "module call name for --scope module")
 	fl.StringVar(&f.out, "out", "", "output file (overwritten); default stdout")
-	fl.StringVar(&f.format, "format", "table", "output format: table, csv, or json")
+	fl.StringVar(&f.format, "format", "markdown", "output format: markdown, csv, or json")
 	fl.StringVar(&f.env, "env", "", "environment name shown in the header")
 	fl.BoolVar(&f.showSensitive, "show-sensitive", false, "show sensitive values unmasked")
 	fl.BoolVar(&f.noDefaultCol, "no-default-col", false, "hide the Default column")
-	fl.StringVar(&f.sortBy, "sort-by", "name", "sort key: name, required, or type")
+	fl.StringVar(&f.sortBy, "sort-by", "required", "sort key: required (required first, then name) or name")
 	fl.BoolVar(&f.recursive, "recursive", false, "process subdirectories recursively")
 	fl.StringVar(&f.recursivePath, "recursive-path", ".", "root to scan in recursive mode")
 	fl.StringVar(&f.configPath, "config", "", "config file path (default: search .tfparams.yml)")
@@ -75,7 +75,7 @@ func Execute() error { return NewRootCmd().Execute() }
 // settings holds the effective configuration after merging file config and flags.
 type settings struct {
 	env, scope, module, format, out, sortBy, source string
-	showSensitive, sortEnabled, recursive           bool
+	showSensitive, recursive                        bool
 	recursivePath, planFile                         string
 	cols                                            []string
 	docs                                            []*parser.Docs
@@ -143,7 +143,10 @@ func resolveSettings(cmd *cobra.Command, f *rootFlags, cfg config.Config) settin
 		s.scope = "root"
 	}
 	if s.format == "" {
-		s.format = "table"
+		s.format = "markdown"
+	}
+	if s.sortBy == "" {
+		s.sortBy = "required"
 	}
 	if s.recursivePath == "" {
 		s.recursivePath = "."
@@ -155,7 +158,6 @@ func resolveSettings(cmd *cobra.Command, f *rootFlags, cfg config.Config) settin
 	if changed("show-sensitive") {
 		s.showSensitive = f.showSensitive
 	}
-	s.sortEnabled = cfg.Sort.Enabled || changed("sort-by")
 
 	cols := cfg.Columns.Show
 	if len(cols) == 0 {
@@ -174,9 +176,7 @@ func buildContent(plan *parser.Plan, s settings) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	if s.sortEnabled {
-		sortParams(params, s.sortBy)
-	}
+	sortParams(params, s.sortBy)
 	moduleName := ""
 	if s.scope == "module" {
 		if moduleName, err = merger.ModuleName(plan, s.module); err != nil {
@@ -193,14 +193,14 @@ func buildContent(plan *parser.Plan, s settings) (string, error) {
 		Columns:       s.cols,
 	}
 	switch s.format {
-	case "table":
+	case "markdown", "table": // "table" kept as a backward-compatible alias
 		return formatter.Markdown(params, opts), nil
 	case "csv":
 		return formatter.CSV(params, opts)
 	case "json":
 		return formatter.JSON(params, opts)
 	default:
-		return "", fmt.Errorf("unknown format %q (want table, csv, or json)", s.format)
+		return "", fmt.Errorf("unknown format %q (want markdown, csv, or json)", s.format)
 	}
 }
 
@@ -258,25 +258,19 @@ func writeToFile(path, content string) error {
 	return os.WriteFile(path, []byte(content), 0o644) //nolint:gosec // sheet is meant to be world-readable
 }
 
+// sortParams orders rows by the chosen key. "required" (default) lists required
+// variables first, then alphabetically; "name" is plain alphabetical.
 func sortParams(params []merger.Param, by string) {
-	switch by {
-	case "required":
-		sort.SliceStable(params, func(i, j int) bool {
-			if params[i].Required != params[j].Required {
-				return params[i].Required
-			}
-			return params[i].Name < params[j].Name
-		})
-	case "type":
-		sort.SliceStable(params, func(i, j int) bool {
-			if params[i].Type != params[j].Type {
-				return params[i].Type < params[j].Type
-			}
-			return params[i].Name < params[j].Name
-		})
-	default:
+	if by == "name" {
 		sort.SliceStable(params, func(i, j int) bool { return params[i].Name < params[j].Name })
+		return
 	}
+	sort.SliceStable(params, func(i, j int) bool {
+		if params[i].Required != params[j].Required {
+			return params[i].Required
+		}
+		return params[i].Name < params[j].Name
+	})
 }
 
 func removeString(s []string, target string) []string {
