@@ -7,7 +7,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/tfparam/tfparams/internal/parser"
+	"github.com/tfparam/tfparams/pkg/parser"
 )
 
 // Scope selects which applied values are used.

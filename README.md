@@ -196,6 +196,23 @@ recursive:
 
 See the [configuration reference](https://tfparam.github.io/tfparams/reference/config-file) for every key.
 
+## Use as a library
+
+The core packages are public and can be imported on their own (the CLI in
+`cmd/` is just a thin wrapper over them):
+
+```go
+import (
+    "github.com/tfparam/tfparams/pkg/parser"    // parse plan JSON / terraform-docs JSON
+    "github.com/tfparam/tfparams/pkg/merger"    // merge into a parameter sheet model
+    "github.com/tfparam/tfparams/pkg/formatter" // render Markdown / CSV / JSON
+    "github.com/tfparam/tfparams/pkg/backend"   // fetch plan JSON from s3/gcs/azblob/local
+    "github.com/tfparam/tfparams/pkg/config"    // load .tfparams.yml
+)
+```
+
+API docs: [pkg.go.dev/github.com/tfparam/tfparams](https://pkg.go.dev/github.com/tfparam/tfparams).
+
 ## License
 
 [MIT](LICENSE)

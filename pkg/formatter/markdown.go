@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/jedib0t/go-pretty/v6/table"
-	"github.com/tfparam/tfparams/internal/merger"
+	"github.com/tfparam/tfparams/pkg/merger"
 )
 
 // DefaultColumns is the standard column order.
