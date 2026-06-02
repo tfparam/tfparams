@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1] - 2026-06-02
+
+
+### 🐛 Bug Fixes
+
+- Write release notes to a gitignored file so goreleaser stays clean ([0545e48](https://github.com/tfparam/tfparams/commit/0545e48d7b87d51aab834dacb88fe39851baf0be))
+
 ## [0.1.0] - 2026-06-02
 
 
@@ -7,11 +14,13 @@
 
 - Mask sensitive from plan config; parse terraform-docs default as raw value ([74c0e3f](https://github.com/tfparam/tfparams/commit/74c0e3f15e85ccb5cfaad820ba44d8e6a052dc76))
 - Use patched Go 1.25.10 toolchain and bump x/net to v0.55.0 ([3e5cc75](https://github.com/tfparam/tfparams/commit/3e5cc75b09af889a2d237d707e3ad825fd2bc784))
+- Nav logo double-base path and release workflow under branch ruleset ([4b93426](https://github.com/tfparam/tfparams/commit/4b9342656e16cc86aec0a38fa0594e6303414ed6))
 
 ### 📚 Documentation
 
 - VitePress documentation site (Track E) ([1616d1a](https://github.com/tfparam/tfparams/commit/1616d1ac2f7d30d74c9cf1105a7b0d8e4bf729fc))
 - Comprehensive README (Track F) ([0c16aca](https://github.com/tfparam/tfparams/commit/0c16aca211e0e68dd346462e80becd05cc815a4a))
+- Real logos, generated changelog, and rendered output examples ([8d347aa](https://github.com/tfparam/tfparams/commit/8d347aa38c67cef81f1eff7665789c83e9314b0d))
 
 ### 🔧 Maintenance
 
