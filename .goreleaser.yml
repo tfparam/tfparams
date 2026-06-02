@@ -1,0 +1,44 @@
+# goreleaser v2 (requires the version header).
+version: 2
+
+project_name: tfparams
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - main: ./main.go
+    binary: tfparams
+    env:
+      - CGO_ENABLED=0
+    goos: [linux, darwin, windows]
+    goarch: [amd64, arm64]
+    ldflags:
+      - -s -w -X main.version={{.Version}}
+    flags:
+      - -trimpath
+
+archives:
+  # v2: format -> formats (list)
+  - formats: [tar.gz]
+    name_template: "{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}"
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+
+# git-cliff generates CHANGELOG.md and release.yml passes it via --release-notes.
+# goreleaser's changelog.use does not support git-cliff, so disable it here.
+changelog:
+  disable: true
+
+# Docker is handled by docker.yml, not goreleaser.
+
+release:
+  github:
+    owner: tfparam
+    name: tfparams
+  name_template: "v{{ .Version }}"
+
+checksum:
+  name_template: "checksums.txt"

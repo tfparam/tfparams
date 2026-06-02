@@ -1,0 +1,32 @@
+[changelog]
+header = "# Changelog"
+body = """
+{% if version %}
+## [{{ version | trim_start_matches(pat="v") }}] - {{ timestamp | date(format="%Y-%m-%d") }}
+{% else %}
+## Unreleased
+{% endif %}
+{% for group, commits in commits | group_by(attribute="group") %}
+### {{ group }}
+{% for commit in commits %}
+- {{ commit.message | upper_first }} ([{{ commit.id | truncate(length=7, end="") }}](https://github.com/tfparam/tfparams/commit/{{ commit.id }}))
+{%- endfor %}
+{% endfor %}
+"""
+footer = ""
+trim = true
+
+[git]
+conventional_commits = true
+filter_unconventional = true
+sort_commits = "oldest"
+
+commit_parsers = [
+  { message = "^feat",     group = "\U0001F680 Features"      },
+  { message = "^fix",      group = "\U0001F41B Bug Fixes"      },
+  { message = "^refactor", group = "\U0001F528 Refactoring"    },
+  { message = "^docs",     group = "\U0001F4DA Documentation"  },
+  { message = "^chore",    group = "\U0001F527 Maintenance"    },
+  { message = "^test",     skip  = true                },
+  { message = "^ci",       skip  = true                },
+]

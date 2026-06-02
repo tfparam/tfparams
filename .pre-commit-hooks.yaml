@@ -1,0 +1,6 @@
+- id: tfparams
+  name: tfparams
+  description: Generate a Terraform parameter sheet
+  language: golang
+  entry: tfparams
+  pass_filenames: false

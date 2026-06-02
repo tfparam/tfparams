@@ -1,0 +1,7 @@
+# .git は除外（version はビルド引数 VERSION で渡すため build 内で git describe しない）
+.git
+.github
+*.md
+prompt/
+e2e/
+testdata/

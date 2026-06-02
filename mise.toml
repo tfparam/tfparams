@@ -1,0 +1,10 @@
+# Note: the cloud SDKs (cloud.google.com/go/storage) require Go >= 1.25, so the
+# project standardizes on Go 1.25 and golangci-lint v2 (v1 cannot analyze 1.25).
+[tools]
+go = "1.25"
+golangci-lint = "2.5.0"
+gofumpt = "latest"
+"go:golang.org/x/tools/cmd/goimports" = "latest"
+"go:golang.org/x/vuln/cmd/govulncheck" = "latest"
+git-cliff = "latest"
+goreleaser = "latest"

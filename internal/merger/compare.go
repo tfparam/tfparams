@@ -1,6 +1,6 @@
 package merger
 
-// EnvResult is one environment's merged parameters, labelled by environment name.
+// EnvResult is one environment's merged parameters, labeled by environment name.
 type EnvResult struct {
 	Name   string
 	Params []Param

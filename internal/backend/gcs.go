@@ -15,12 +15,12 @@ func fetchGCS(ctx context.Context, s Source) ([]byte, error) {
 	if err != nil {
 		return nil, fmt.Errorf("gcs: new client: %w", err)
 	}
-	defer client.Close()
+	defer func() { _ = client.Close() }()
 
 	r, err := client.Bucket(s.Bucket).Object(s.Key).NewReader(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("gcs: read gs://%s/%s: %w", s.Bucket, s.Key, err)
 	}
-	defer r.Close()
+	defer func() { _ = r.Close() }()
 	return io.ReadAll(r)
 }
