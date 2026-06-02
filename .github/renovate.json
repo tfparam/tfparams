@@ -9,15 +9,25 @@
   "postUpdateOptions": ["gomodTidy"],
   "packageRules": [
     {
-      "description": "Group all GitHub Actions bumps into one PR",
+      "description": "Group + automerge GitHub Actions bumps once CI (Go tests) passes",
       "matchManagers": ["github-actions"],
-      "groupName": "github-actions"
+      "groupName": "github-actions",
+      "automerge": true,
+      "platformAutomerge": false
     },
     {
-      "description": "Group non-major Go module updates into one PR",
+      "description": "Group + automerge non-major Go updates once CI (Go tests) passes",
       "matchManagers": ["gomod"],
       "matchUpdateTypes": ["minor", "patch"],
-      "groupName": "go modules (non-major)"
+      "groupName": "go modules (non-major)",
+      "automerge": true,
+      "platformAutomerge": false
+    },
+    {
+      "description": "Major Go updates are not automerged — they need a human review",
+      "matchManagers": ["gomod"],
+      "matchUpdateTypes": ["major"],
+      "automerge": false
     }
   ]
 }
