@@ -1,5 +1,26 @@
 # Changelog
 
+## [0.2.0] - 2026-06-02
+
+
+### 🐛 Bug Fixes
+
+- Attach release notes via gh after goreleaser ([7ee3491](https://github.com/tfparam/tfparams/commit/7ee34915c1b2a33be5c63628e6d06f5bb5972b5e))
+
+### 📚 Documentation
+
+- Sync changelog for v0.1.1 ([cbc1fcc](https://github.com/tfparam/tfparams/commit/cbc1fcca9711d64e03c1ab46ed68cd4e2412711b))
+- Show the complete output file and clarify plan-vs-tfvars ([22007a4](https://github.com/tfparam/tfparams/commit/22007a43eddd5e1628a7f03c491af24015f19c3a))
+
+### 🔧 Maintenance
+
+- Move GitHub Action to tfparam/tfparams-action ([775357e](https://github.com/tfparam/tfparams/commit/775357ef738250cc370a178865def2872d62ae56))
+- Update Go module dependencies to latest ([1baf055](https://github.com/tfparam/tfparams/commit/1baf055d2c6d83a18f842a94fa70037e6416bdcc))
+
+### 🔨 Refactoring
+
+- Move core packages from internal/ to pkg/ (public API) ([26729ad](https://github.com/tfparam/tfparams/commit/26729ad957a8be3926c040a2128913754e948ac2))
+
 ## [0.1.1] - 2026-06-02
 
 
