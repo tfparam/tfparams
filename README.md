@@ -152,12 +152,12 @@ tfparams --plan-json plan.json --docs-json docs.json --out PARAMETERS.md
 ### CI/CD
 
 ```yaml
-# GitHub Actions (composite action)
-- uses: tfparam/tfparams@v0.1.0
+# GitHub Actions — see github.com/tfparam/tfparams-action
+- uses: tfparam/tfparams-action@v1
   with:
     plan-json: plan.json
     docs-json: docs.json
-    output-file: PARAMETERS.md
+    out: PARAMETERS.md
 ```
 
 ```yaml
