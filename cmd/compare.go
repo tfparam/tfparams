@@ -7,10 +7,10 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
-	"github.com/tfparam/tfparams/internal/backend"
-	"github.com/tfparam/tfparams/internal/formatter"
-	"github.com/tfparam/tfparams/internal/merger"
-	"github.com/tfparam/tfparams/internal/parser"
+	"github.com/tfparam/tfparams/pkg/backend"
+	"github.com/tfparam/tfparams/pkg/formatter"
+	"github.com/tfparam/tfparams/pkg/merger"
+	"github.com/tfparam/tfparams/pkg/parser"
 )
 
 type compareFlags struct {

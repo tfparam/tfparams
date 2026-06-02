@@ -3,7 +3,7 @@ package formatter
 import (
 	"strings"
 
-	"github.com/tfparam/tfparams/internal/merger"
+	"github.com/tfparam/tfparams/pkg/merger"
 )
 
 // CompareOptions controls the environment comparison table.

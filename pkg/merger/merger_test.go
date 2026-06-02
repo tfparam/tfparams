@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/tfparam/tfparams/internal/parser"
+	"github.com/tfparam/tfparams/pkg/parser"
 )
 
 const planJSON = `{
