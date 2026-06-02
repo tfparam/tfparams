@@ -1,0 +1,16 @@
+{
+  "format_version": "1.2",
+  "variables": {
+    "instance_type": { "value": "t3.xlarge" },
+    "replica_count": { "value": 3 },
+    "db_password": { "value": "prd-pw" }
+  },
+  "configuration": {
+    "root_module": {
+      "variables": {
+        "db_password": { "description": "DBパスワード", "sensitive": true }
+      },
+      "module_calls": {}
+    }
+  }
+}

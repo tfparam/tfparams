@@ -1,0 +1,16 @@
+{
+  "format_version": "1.2",
+  "variables": {
+    "instance_type": { "value": "t3.small" },
+    "replica_count": { "value": 1 },
+    "db_password": { "value": "dev-pw" }
+  },
+  "configuration": {
+    "root_module": {
+      "variables": {
+        "db_password": { "description": "DBパスワード", "sensitive": true }
+      },
+      "module_calls": {}
+    }
+  }
+}
