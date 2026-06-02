@@ -34,6 +34,10 @@ go.work.sum
 # 作業用プロンプト（配布対象外）
 prompt/
 
+# Release artifacts (goreleaser output dir; generated release notes)
+dist/
+RELEASE_NOTES.md
+
 # Terraform working files (e.g. e2e fixtures)
 **/.terraform/
 **/.terraform.lock.hcl
