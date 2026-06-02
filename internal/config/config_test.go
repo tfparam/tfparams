@@ -17,8 +17,8 @@ func TestDefault(t *testing.T) {
 	if c.Recursive.Path != "." {
 		t.Errorf("Recursive.Path = %q, want .", c.Recursive.Path)
 	}
-	if c.Sensitive.Mask != "(sensitive)" {
-		t.Errorf("Sensitive.Mask = %q", c.Sensitive.Mask)
+	if c.Sort.By != "required" {
+		t.Errorf("Sort.By = %q, want required", c.Sort.By)
 	}
 }
 
@@ -37,8 +37,8 @@ func TestLoadExplicit(t *testing.T) {
 		t.Errorf("loaded config = %+v", c)
 	}
 	// Defaults must be preserved for unspecified keys.
-	if c.Sensitive.Mask != "(sensitive)" {
-		t.Errorf("default mask lost: %q", c.Sensitive.Mask)
+	if c.Sort.By != "required" {
+		t.Errorf("default sort lost: %q", c.Sort.By)
 	}
 }
 

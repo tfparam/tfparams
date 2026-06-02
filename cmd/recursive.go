@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 
@@ -14,6 +15,8 @@ import (
 // contains the configured plan-JSON file. Each subdirectory may override the
 // root config via its own .tfparams.yml.
 func runRecursive(cmd *cobra.Command, f *rootFlags, rootCfg config.Config, root settings) error {
+	log := slog.New(slog.NewTextHandler(cmd.ErrOrStderr(), &slog.HandlerOptions{Level: slog.LevelInfo}))
+
 	entries, err := os.ReadDir(root.recursivePath)
 	if err != nil {
 		return fmt.Errorf("scan %s: %w", root.recursivePath, err)
@@ -27,7 +30,7 @@ func runRecursive(cmd *cobra.Command, f *rootFlags, rootCfg config.Config, root 
 		dir := filepath.Join(root.recursivePath, e.Name())
 		planPath := filepath.Join(dir, root.planFile)
 		if !fileExists(planPath) {
-			_, _ = fmt.Fprintf(cmd.ErrOrStderr(), "tfparams: skipping %s (no %s)\n", dir, root.planFile)
+			log.Warn("skipping subdirectory: no plan file", "dir", dir, "plan_file", root.planFile)
 			continue
 		}
 
@@ -51,19 +54,20 @@ func runRecursive(cmd *cobra.Command, f *rootFlags, rootCfg config.Config, root 
 		}
 
 		if sub.out == "" {
+			// Program output (the sheets) goes to stdout, not the diagnostic logger.
 			_, _ = fmt.Fprintf(cmd.OutOrStdout(), "===== %s =====\n%s\n", dir, content)
 		} else {
 			target := filepath.Join(dir, sub.out)
-			if werr := writeToFile(target, sub.mode, content); werr != nil {
+			if werr := writeToFile(target, content); werr != nil {
 				return werr
 			}
-			_, _ = fmt.Fprintf(cmd.ErrOrStderr(), "tfparams: wrote %s\n", target)
+			log.Info("wrote parameter sheet", "path", target)
 		}
 		processed++
 	}
 
 	if processed == 0 {
-		_, _ = fmt.Fprintf(cmd.ErrOrStderr(), "tfparams: no subdirectories with %s under %s\n", root.planFile, root.recursivePath)
+		log.Warn("no subdirectories with a plan file", "plan_file", root.planFile, "root", root.recursivePath)
 	}
 	return nil
 }
