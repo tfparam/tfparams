@@ -8,7 +8,7 @@
 ## Variables
 
 | Name | Description | Type | Default | Applied Value | Required |
-|------|------|------|------|------|------|
+| --- | --- | --- | --- | --- | --- |
 | instance_type | EC2インスタンスタイプ | `string` | `t3.medium` | `t3.xlarge` | - |
 | replica_count | RDSレプリカ数 | `number` | `1` | `3` | - |
 | db_password | DBパスワード | `string` | - | (sensitive) | ✓ |
