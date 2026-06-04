@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.3.0] - 2026-06-04
+
+
+### 📚 Documentation
+
+- Sync changelog for v0.2.0 ([c59fdbb](https://github.com/tfkit/tfparams/commit/c59fdbbe607ac4cdd94b036f50dfc80c4c4961af))
+
+### 🔧 Maintenance
+
+- Rename org tfparam->tfkit, bump Go to 1.25.11, add self-hosted Renovate ([135ba96](https://github.com/tfkit/tfparams/commit/135ba96e0ae6116d870d95927ebaef59fb6395fb))
+
 ## [0.2.0] - 2026-06-02
 
 
@@ -14,7 +25,7 @@
 
 ### 🔧 Maintenance
 
-- Move GitHub Action to tfkit/tfparams-action ([775357e](https://github.com/tfkit/tfparams/commit/775357ef738250cc370a178865def2872d62ae56))
+- Move GitHub Action to tfparam/tfparams-action ([775357e](https://github.com/tfkit/tfparams/commit/775357ef738250cc370a178865def2872d62ae56))
 - Update Go module dependencies to latest ([1baf055](https://github.com/tfkit/tfparams/commit/1baf055d2c6d83a18f842a94fa70037e6416bdcc))
 
 ### 🔨 Refactoring
