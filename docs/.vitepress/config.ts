@@ -39,7 +39,7 @@ export default defineConfig({
       ],
     },
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/tfparam/tfparams' },
+      { icon: 'github', link: 'https://github.com/tfkit/tfparams' },
     ],
     footer: {
       message: 'Released under the MIT License.',

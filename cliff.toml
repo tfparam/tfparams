@@ -9,7 +9,7 @@ body = """
 {% for group, commits in commits | group_by(attribute="group") %}
 ### {{ group }}
 {% for commit in commits %}
-- {{ commit.message | upper_first }} ([{{ commit.id | truncate(length=7, end="") }}](https://github.com/tfparam/tfparams/commit/{{ commit.id }}))
+- {{ commit.message | upper_first }} ([{{ commit.id | truncate(length=7, end="") }}](https://github.com/tfkit/tfparams/commit/{{ commit.id }}))
 {%- endfor %}
 {% endfor %}
 """

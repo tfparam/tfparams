@@ -3,26 +3,26 @@
 ## go install
 
 ```bash
-go install github.com/tfparam/tfparams@latest
+go install github.com/tfkit/tfparams@latest
 ```
 
 ## Homebrew (tap)
 
 ```bash
-brew install tfparam/tap/tfparams
+brew install tfkit/tap/tfparams
 ```
 
 ## Pre-built binaries
 
 Download the archive for your OS/arch from the
-[GitHub Releases](https://github.com/tfparam/tfparams/releases) page and extract `tfparams`.
+[GitHub Releases](https://github.com/tfkit/tfparams/releases) page and extract `tfparams`.
 
 ## Docker
 
 ```bash
 docker run --rm -v "$(pwd):/work" -w /work \
-  ghcr.io/tfparam/tfparams:latest \
+  ghcr.io/tfkit/tfparams:latest \
   --plan-json plan.json --docs-json docs.json
 ```
 
-Images are published to `ghcr.io/tfparam/tfparams` for `linux/amd64` and `linux/arm64`.
+Images are published to `ghcr.io/tfkit/tfparams` for `linux/amd64` and `linux/arm64`.

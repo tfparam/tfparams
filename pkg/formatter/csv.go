@@ -4,7 +4,7 @@ import (
 	"encoding/csv"
 	"strings"
 
-	"github.com/tfparam/tfparams/pkg/merger"
+	"github.com/tfkit/tfparams/pkg/merger"
 )
 
 // CSV renders the parameters as CSV using the configured column order.

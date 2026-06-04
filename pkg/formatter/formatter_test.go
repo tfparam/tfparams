@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/tfparam/tfparams/pkg/merger"
+	"github.com/tfkit/tfparams/pkg/merger"
 )
 
 var update = flag.Bool("update", false, "update golden files")
