@@ -10,7 +10,7 @@
   the <strong>applied input-variable values from a plan</strong> with <strong>variable metadata from terraform-docs</strong>.
 </p>
 
-📖 **Documentation:** <https://tfparam.github.io/tfparams>
+📖 **Documentation:** <https://tfkit.github.io/tfparams>
 
 ---
 
@@ -67,17 +67,17 @@ refresh, use `terraform plan -refresh=false`; for drift only, `-refresh-only`.
 
 ```bash
 # go install
-go install github.com/tfparam/tfparams@latest
+go install github.com/tfkit/tfparams@latest
 
 # Homebrew tap
-brew install tfparam/tap/tfparams
+brew install tfkit/tap/tfparams
 
 # Docker
 docker run --rm -v "$(pwd):/work" -w /work \
-  ghcr.io/tfparam/tfparams:latest --plan-json plan.json --docs-json docs.json
+  ghcr.io/tfkit/tfparams:latest --plan-json plan.json --docs-json docs.json
 ```
 
-Pre-built binaries are on the [Releases](https://github.com/tfparam/tfparams/releases) page.
+Pre-built binaries are on the [Releases](https://github.com/tfkit/tfparams/releases) page.
 
 ## Usage
 
@@ -152,8 +152,8 @@ tfparams --plan-json plan.json --docs-json docs.json --out PARAMETERS.md
 ### CI/CD
 
 ```yaml
-# GitHub Actions — see github.com/tfparam/tfparams-action
-- uses: tfparam/tfparams-action@v1
+# GitHub Actions — see github.com/tfkit/tfparams-action
+- uses: tfkit/tfparams-action@v1
   with:
     plan-json: plan.json
     docs-json: docs.json
@@ -163,7 +163,7 @@ tfparams --plan-json plan.json --docs-json docs.json --out PARAMETERS.md
 ```yaml
 # pre-commit
 repos:
-  - repo: https://github.com/tfparam/tfparams
+  - repo: https://github.com/tfkit/tfparams
     rev: "v0.1.0"
     hooks:
       - id: tfparams
@@ -194,7 +194,7 @@ recursive:
   plan_file: tfplan.json  # plan JSON filename per subdirectory
 ```
 
-See the [configuration reference](https://tfparam.github.io/tfparams/reference/config-file) for every key.
+See the [configuration reference](https://tfkit.github.io/tfparams/reference/config-file) for every key.
 
 ## Use as a library
 
@@ -203,15 +203,15 @@ The core packages are public and can be imported on their own (the CLI in
 
 ```go
 import (
-    "github.com/tfparam/tfparams/pkg/parser"    // parse plan JSON / terraform-docs JSON
-    "github.com/tfparam/tfparams/pkg/merger"    // merge into a parameter sheet model
-    "github.com/tfparam/tfparams/pkg/formatter" // render Markdown / CSV / JSON
-    "github.com/tfparam/tfparams/pkg/backend"   // fetch plan JSON from s3/gcs/azblob/local
-    "github.com/tfparam/tfparams/pkg/config"    // load .tfparams.yml
+    "github.com/tfkit/tfparams/pkg/parser"    // parse plan JSON / terraform-docs JSON
+    "github.com/tfkit/tfparams/pkg/merger"    // merge into a parameter sheet model
+    "github.com/tfkit/tfparams/pkg/formatter" // render Markdown / CSV / JSON
+    "github.com/tfkit/tfparams/pkg/backend"   // fetch plan JSON from s3/gcs/azblob/local
+    "github.com/tfkit/tfparams/pkg/config"    // load .tfparams.yml
 )
 ```
 
-API docs: [pkg.go.dev/github.com/tfparam/tfparams](https://pkg.go.dev/github.com/tfparam/tfparams).
+API docs: [pkg.go.dev/github.com/tfkit/tfparams](https://pkg.go.dev/github.com/tfkit/tfparams).
 
 ## License
 

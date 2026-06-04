@@ -13,7 +13,7 @@ omits `TF_VAR_*`, `-var`, defaults, and computed values). Always feed a plan:
 ## Install
 
 ```bash
-go install github.com/tfparam/tfparams@latest
+go install github.com/tfkit/tfparams@latest
 ```
 
 See [Installation](./installation) for Homebrew, binaries, and Docker.

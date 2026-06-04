@@ -9,10 +9,10 @@ import (
 	"time"
 
 	"github.com/spf13/cobra"
-	"github.com/tfparam/tfparams/pkg/config"
-	"github.com/tfparam/tfparams/pkg/formatter"
-	"github.com/tfparam/tfparams/pkg/merger"
-	"github.com/tfparam/tfparams/pkg/parser"
+	"github.com/tfkit/tfparams/pkg/config"
+	"github.com/tfkit/tfparams/pkg/formatter"
+	"github.com/tfkit/tfparams/pkg/merger"
+	"github.com/tfkit/tfparams/pkg/parser"
 )
 
 var version = "dev"

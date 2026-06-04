@@ -15,7 +15,7 @@ hero:
       link: /guide/getting-started
     - theme: alt
       text: View on GitHub
-      link: https://github.com/tfparam/tfparams
+      link: https://github.com/tfkit/tfparams
 
 features:
   - title: Plan-aware

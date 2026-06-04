@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/tfparam/tfparams/pkg/merger"
+	"github.com/tfkit/tfparams/pkg/merger"
 )
 
 func sampleRows() []merger.CompareRow {

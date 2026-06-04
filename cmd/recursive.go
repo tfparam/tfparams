@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 
 	"github.com/spf13/cobra"
-	"github.com/tfparam/tfparams/pkg/config"
-	"github.com/tfparam/tfparams/pkg/parser"
+	"github.com/tfkit/tfparams/pkg/config"
+	"github.com/tfkit/tfparams/pkg/parser"
 )
 
 // runRecursive processes every immediate subdirectory of recursivePath that

@@ -3,7 +3,7 @@ package formatter
 import (
 	"encoding/json"
 
-	"github.com/tfparam/tfparams/pkg/merger"
+	"github.com/tfkit/tfparams/pkg/merger"
 )
 
 type jsonDoc struct {

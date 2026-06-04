@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/tfparam/tfparams/cmd"
+	"github.com/tfkit/tfparams/cmd"
 )
 
 // version is overridden at build time via -ldflags "-X main.version=...".
